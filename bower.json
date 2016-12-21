@@ -1,0 +1,22 @@
+{
+  "name": "task-manager",
+  "description": "Simple task manager build with angularJS",
+  "main": "index.html",
+  "authors": [
+    "Philipp Melnikov"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.6.0",
+    "angular-material": "^1.1.1",
+    "svg-assets-cache.js": "svg-assets-cache#*"
+  }
+}
