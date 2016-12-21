@@ -119,9 +119,9 @@ md-content {
 .task-list-container .md-fab.add-task {
   color: #fff;
   font-size: 30px;
-  position: absolute;
-  bottom: 0px;
-  right: 20px;
+  position: fixed;
+  bottom: 25px;
+  right: 50px;
 }
 .tasks-for-a-day {
   width: 600px;
