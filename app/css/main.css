@@ -1,0 +1,162 @@
+body {
+  font-family: sans-serif;
+}
+md-sidenav {
+  width: 310px;
+  height: 100%;
+  padding: 20px;
+  background-color: #292c33;
+  position: relative;
+}
+md-sidenav md-card {
+  background-color: #292c33;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  color: #fff;
+}
+md-sidenav md-card md-card-title {
+  padding: 0;
+}
+.card-image {
+  height: 60px;
+  width: 60px;
+  min-height: 60px;
+  min-width: 60px;
+  margin-right: 16px;
+  -webkit-border-radius: 50%;
+          border-radius: 50%;
+  overflow: hidden;
+  background-color: #fff;
+  vertical-align: middle;
+}
+md-card-user-name {
+  display: inline-block;
+  height: 60px;
+  line-height: 60px;
+  vertical-align: middle;
+}
+.project-list {
+  color: #fff;
+  padding-left: 0;
+}
+.project-list #add-project p {
+  color: #ccc;
+}
+.project-list #add-project .md-button.md-icon-button {
+  margin-right: -15px;
+  padding: 0;
+}
+.project-list md-list-item {
+  padding: 0 16px 0 10px;
+}
+.project-list md-list-item.md-no-proxy {
+  cursor: pointer;
+}
+.project-list md-list-item.md-no-proxy:hover {
+  background-color: #6b6b99;
+}
+.log-out {
+  color: #fff;
+  position: absolute;
+  bottom: 5px;
+  left: 28px;
+}
+.log-out a {
+  text-decoration: none;
+  color: #fff;
+  cursor: pointer;
+}
+md-content {
+  background-color: #f7f7f7;
+  height: 100%;
+  padding: 20px;
+}
+.md-toolbar-tools {
+  background-color: #f7f7f7;
+  color: #b3bbcb;
+}
+.md-toolbar-tools .md-icon-button {
+  color: #b3bbcb;
+  font-size: 25px;
+}
+.md-toolbar-tools #search-button {
+  margin: 0;
+  padding: 0;
+}
+.search-container {
+  position: relative;
+  width: 160px;
+  height: 30px;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.search-container .search-bar {
+  width: 160px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-border-radius: 8px;
+          border-radius: 8px;
+  -webkit-transform: translateX(-160px);
+      -ms-transform: translateX(-160px);
+          transform: translateX(-160px);
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+}
+.search-container .search-bar.search-active {
+  -webkit-transform: translateX(0px);
+      -ms-transform: translateX(0px);
+          transform: translateX(0px);
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+}
+.task-list-container {
+  padding-bottom: 150px;
+  position: relative;
+}
+.task-list-container .md-fab.add-task {
+  color: #fff;
+  font-size: 30px;
+  position: absolute;
+  bottom: 0px;
+  right: 20px;
+}
+.tasks-for-a-day {
+  width: 600px;
+  max-width: 600px;
+  min-width: 100px;
+}
+.tasks-for-a-day h4 {
+  color: #d1d5de;
+  font-size: 14px;
+  font-weight: 100;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  margin-top: 25px;
+}
+.tasks-for-a-day .day-card {
+  margin: 0;
+  padding: 0 50px;
+  -webkit-border-radius: 7px;
+          border-radius: 7px;
+  -webkit-box-shadow: 0px 5px 20px 3px rgba(184, 184, 184, 0.7);
+          box-shadow: 0px 5px 20px 3px rgba(184, 184, 184, 0.7);
+}
+.tasks-for-a-day .day-card .task-text {
+  width: 100%;
+  font-weight: 600;
+  position: relative;
+}
+.tasks-for-a-day .day-card .task-text:before {
+  content: "";
+  position: absolute;
+  left: -40px;
+  bottom: 2px;
+  width: 10px;
+  height: 10px;
+  -webkit-border-radius: 50%;
+          border-radius: 50%;
+  border: 3px solid #d1d5de;
+}

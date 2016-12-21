@@ -1,0 +1,193 @@
+ body{
+ 	font-family: sans-serif;
+ }
+ md-sidenav  
+ {
+    width: 310px;
+    height:100%;
+    padding:20px;
+    background-color: #292c33;
+    position: relative;
+    md-card
+	{
+		background-color: #292c33;
+		box-shadow: none;
+		color: #fff;
+		md-card-title
+		{
+			padding: 0;
+		}		
+	}
+ }
+ 
+.card-image
+{
+  height: 60px;
+  width: 60px;
+  min-height: 60px;
+  min-width: 60px;
+  margin-right: 16px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #fff; 
+  vertical-align: middle;
+}
+md-card-user-name
+{
+	display: inline-block;
+	height: 60px;
+	line-height: 60px;
+	vertical-align: middle;
+}
+.project-list
+{
+	color: #fff;
+	padding-left: 0;
+	#add-project  
+	{
+		p
+		{
+			color: #ccc;
+		}
+		.md-button.md-icon-button
+		{
+		
+			margin-right: -15px;
+			padding: 0;
+			// width: 21px;
+			// height: 21px;
+		}
+		
+	}
+	
+	md-list-item
+	{
+		padding: 0 16px 0 10px; 
+	}
+	md-list-item.md-no-proxy
+	{
+		cursor: pointer;
+		&:hover
+		{
+			background-color: #6b6b99;
+		}
+	}
+	
+}
+.log-out
+{
+	color: #fff;
+	position: absolute;
+	bottom: 5px;
+	left: 28px;
+	a
+	{
+		text-decoration: none;
+		color: #fff;
+		cursor: pointer;
+	}
+
+}
+md-content 
+{
+    background-color : #f7f7f7;
+    height:100%;
+    padding:20px;
+}
+.md-toolbar-tools
+{
+	background-color: #f7f7f7;
+	color: #b3bbcb;
+	.md-icon-button
+	{
+		color: #b3bbcb;
+		font-size: 25px;
+	}
+	#search-button
+	{
+		margin: 0;
+		padding: 0;
+
+	}
+}
+.search-container
+{
+	position: relative;
+	width: 160px;
+	height: 30px;
+	display: inline-block;
+	overflow: hidden;
+	vertical-align: middle;
+	.search-bar
+	{
+		// margin-top: 10px;
+		width: 160px;
+		height: 28px;
+		padding: 0 10px; 
+		font-size: 12px;
+		border: 1px solid rgba(0,0,0,0.2);
+		border-radius: 8px;
+		transform: translateX(-160px);
+		transition: all 0.3s;
+		&.search-active
+		{
+			transform: translateX(0px);
+			transition: all 0.3s;
+		}
+	}
+}
+.task-list-container
+{
+	padding-bottom: 150px;
+	position: relative;
+	.md-fab.add-task
+	{
+		color: #fff;
+		font-size: 30px;
+		position: absolute;
+		bottom: 0px;
+		right: 20px;
+	}
+	
+}
+.tasks-for-a-day
+{
+	width: 600px;
+	max-width: 600px;
+	min-width: 100px;
+	h4
+	{
+		color: #d1d5de;
+		font-size: 14px;
+    	font-weight: 100;
+    	letter-spacing: -0.5px;
+    	margin-bottom: 8px;
+    	margin-top: 25px;
+	}
+	.day-card
+	{
+		margin: 0;
+		padding: 0 50px; 
+		border-radius: 7px;
+		box-shadow: 0px 5px 20px 3px rgba(184,184,184,0.7);
+
+		.task-text
+		{
+			width: 100%;
+			font-weight: 600;
+			position: relative;
+			&:before
+			{
+				content: "";
+				position: absolute;
+				left: -40px;
+				bottom: 2px;
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				border: 3px solid #d1d5de;
+			}
+		}
+
+	}
+}
