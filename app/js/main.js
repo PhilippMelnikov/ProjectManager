@@ -1,6 +1,6 @@
 app = angular.module('TaskManagerApp', ['ngMaterial', 'ngMessages']);
 
-app.config(function ($mdThemingProvider, $mdIconProvider) {
+app.config(function ($mdThemingProvider) {
 
    var customPrimary = {
         '50': '#b6b6cd',
@@ -24,8 +24,6 @@ app.config(function ($mdThemingProvider, $mdIconProvider) {
       .primaryPalette('customPrimary')
       .accentPalette('green');
 
-    $mdIconProvider
-      .defaultIconSet('img/icons/sets/social-icons.svg', 24);
   });
 // User Profile 
 app.directive('userProfile', function () {
