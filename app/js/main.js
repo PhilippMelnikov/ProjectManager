@@ -1,4 +1,4 @@
-app = angular.module('TaskManagerApp', ['ngMaterial', 'ngMessages', 'material.svgAssetsCache']);
+app = angular.module('TaskManagerApp', ['ngMaterial', 'ngMessages']);
 
 app.config(function ($mdThemingProvider, $mdIconProvider) {
 

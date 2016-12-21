@@ -17,7 +17,7 @@ md-sidenav md-card {
 md-sidenav md-card md-card-title {
   padding: 0;
 }
-.card-image {
+.user-card-image {
   height: 60px;
   width: 60px;
   min-height: 60px;
@@ -25,9 +25,21 @@ md-sidenav md-card md-card-title {
   margin-right: 16px;
   -webkit-border-radius: 50%;
           border-radius: 50%;
+  color: #333;
+  font-size: 30px;
   overflow: hidden;
   background-color: #fff;
   vertical-align: middle;
+  position: relative;
+}
+.user-card-image .user-image {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  z-index: 2;
 }
 md-card-user-name {
   display: inline-block;

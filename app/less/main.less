@@ -20,7 +20,7 @@
 	}
  }
  
-.card-image
+.user-card-image
 {
   height: 60px;
   width: 60px;
@@ -28,9 +28,20 @@
   min-width: 60px;
   margin-right: 16px;
   border-radius: 50%;
+  color: #333;
+  font-size: 30px;
   overflow: hidden;
   background-color: #fff; 
   vertical-align: middle;
+  position: relative;
+  .user-image
+  {
+  	position: absolute;
+  	left:50%;
+  	top: 50%;
+  	transform: translate(-50%, -50%);
+  	z-index: 2;
+  }
 }
 md-card-user-name
 {
