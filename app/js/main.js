@@ -1,4 +1,4 @@
-app = angular.module('TaskManagerApp', ['ngMaterial', 'ngMessages']);
+app = angular.module('ProjectManagerApp', ['ngMaterial', 'ngMessages']);
 
 app.config(function ($mdThemingProvider) {
 
@@ -130,22 +130,20 @@ app.controller('TaskListCtrl', function($scope) {
   app.directive('searchBar', function() {
     return {
       restrict: 'E',
-    
-      controller: function ($scope) {
+      link: function(scope, element, attrs){
         var sButton = document.getElementById("search-button");
         var sBar = document.getElementById("search-bar");
 
         var searchButton = angular.element(sButton);
         var searchBar = angular.element(sBar);
         var active = false;
-        $scope.activateSearch = function () {
-          console.log(searchButton);
+        searchButton.on('click', function () {
           active = !active;
           if(active)
           {searchBar.addClass('search-active');}
           else
           {searchBar.removeClass('search-active');}
-        };
+        });
       }
     };
 
