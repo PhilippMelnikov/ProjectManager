@@ -41,14 +41,38 @@ app.directive('userProfile', function () {
   });
 
 // Project List
-app.controller('ProjectListCtrl', function($scope) {
-
+app.controller('ProjectListCtrl', function($scope, $mdDialog) {
+// fake data
 	$scope.projects = [
     { name: 'Private', tasksQuantity: '9' },
     { name: 'Decode', tasksQuantity: '13' },
     { name: 'Family', tasksQuantity: '10' },
     { name: 'Cookie', tasksQuantity: '12' }
   ];
+// end fake data
+  $scope.status = '  ';
+  $scope.customFullscreen = false;
+
+   $scope.showAddProjectDialog = function(ev) {
+    // Appending dialog to document.body to cover sidenav in docs app
+    var confirm = $mdDialog.prompt()
+      .clickOutsideToClose(true)
+      .title('What would you name your brand new project?')
+      .textContent('Bowser is a common name.')
+      .placeholder('Project name')
+      .ariaLabel('Project name')
+      .initialValue('Bowser')
+      .targetEvent(ev)
+      .ok('Okay!')
+      .cancel('Cancel');
+
+    $mdDialog.show(confirm).then(function(result) {
+      $scope.status = 'You decided to name your dog ' + result + '.';
+    }, function() {
+      $scope.status = 'You didn\'t name your dog.';
+    });
+  };
+
 
 } );
 
@@ -66,7 +90,7 @@ app.directive('taskList', function () {
     }
   });
 
-app.controller('TaskListCtrl', function($scope) {
+app.controller('TaskListCtrl', function($scope, $mdDialog) {
 
 	$scope.tasks = [
     { date: '20.12.2016', description: 'Create a company'},
@@ -123,6 +147,37 @@ app.controller('TaskListCtrl', function($scope) {
 
   	};
   	$scope.finalTaskList = $scope.formTaskList();
+
+     $scope.showAddTaskDialog = function(ev) {
+    $mdDialog.show({
+      controller: DialogController,
+      templateUrl: 'add.task.dialog.html',
+      parent: angular.element(document.body),
+      targetEvent: ev,
+      clickOutsideToClose:true,
+      fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
+    })
+    .then(function(answer) {
+      $scope.status = 'You said the information was "' + answer + '".';
+    }, function() {
+      $scope.status = 'You cancelled the dialog.';
+    });
+  };
+
+    function DialogController($scope, $mdDialog) {
+    $scope.hide = function() {
+      $mdDialog.hide();
+    };
+
+    $scope.cancel = function() {
+      $mdDialog.cancel();
+    };
+
+    $scope.answer = function(answer) {
+      $mdDialog.hide(answer);
+    };
+  }
+
 } );
 
 
@@ -140,10 +195,88 @@ app.controller('TaskListCtrl', function($scope) {
         searchButton.on('click', function () {
           active = !active;
           if(active)
-          {searchBar.addClass('search-active');}
+          {
+            searchBar.removeClass('not-active');
+            searchBar.addClass('active');
+            searchBar.find("input").focus();
+           }
           else
-          {searchBar.removeClass('search-active');}
+          {
+            searchBar.addClass('not-active');
+            setTimeout(function () {
+              searchBar.removeClass('active');
+              searchBar.find("input").val("");
+            }, 200);
+          }
         });
+      }
+    };
+
+  });
+
+  app.directive('toolsMenu', function() {
+    return {
+      restrict: 'E',
+      link: function(scope, element, attrs){
+        var tButton = document.getElementById("tools-button");
+        var dMenu = document.getElementById("drop-down-menu");
+
+        var toolsButton = angular.element(tButton);
+        // var dropMenu = angular.element(dMenu);
+        var dropMenu = $("#drop-down-menu");
+        var active = false;
+        var clickPermission = true;
+        dropMenu.attr('tabindex',-1);
+
+        toolsButton.on('click', function (event) {
+          if (clickPermission)
+          {
+            clickPermission = false;
+            setTimeout(function () {
+              clickPermission = true;
+            },200);
+            event.preventDefault();
+            active = !active;
+            if(active)
+            {
+
+              dropMenu.removeClass('not-active');
+              dropMenu.addClass('active');
+              dropMenu.focus();
+             }
+            else
+            {
+
+            }
+          }
+          else
+          {
+            console.log("doubleClick");
+          }
+          
+        });
+
+        dropMenu.focusout(function (event) {
+          if (clickPermission)
+          { 
+              clickPermission = false;
+              setTimeout(function () {
+                clickPermission = true;
+              },200);
+              event.preventDefault();
+              active = !active;
+              dropMenu.addClass('not-active');
+              setTimeout(function () {
+                dropMenu.removeClass('active');
+                }, 200);
+          }
+          else
+          {
+            console.log("doubleClick");
+          }
+          
+        });
+
       }
     };
 

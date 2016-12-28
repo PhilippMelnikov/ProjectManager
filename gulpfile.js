@@ -10,6 +10,10 @@ pngquant	= require('imagemin-pngquant'),
 cache		= require('gulp-cache'),
 autoprefixer= require('gulp-autoprefixer'),
 upmodul = require("gulp-update-modul"),
+babel = require ('gulp-babel'),
+sourcemaps = require ("gulp-sourcemaps"),
+browserify = require ("browserify"),
+source = require('vinyl-source-stream'),
 less = require('gulp-less');
 
 // UPDATE 
@@ -18,37 +22,22 @@ gulp.task('update-modul', function () {
     .pipe(upmodul('latest', 'false')); //update all modules latest version. 
 });
 
-//SASS
-// gulp.task('sass',function () {
-// 	console.log('Hello, I\'m Task!');
-// 	return gulp.src('app/sass/**/*.sass')
-// 	.pipe(sass({outputStyle: 'extended'}).on('error', sass.logError))
-// 	.pipe(autoprefixer(['last 15 versions', '> 1%', 'ie 8', 'ie 7'],{cascade: true}))
-// 	.pipe(gulp.dest('app/css'))
-// 	.pipe(browserSync.reload({stream: true}));
-// });
-
 //Browserify
-// gulp.task('browserify', function(){
-// 	 return gulp.src('app/js/app.js')
-// 	 .pipe(browserify())
-// 	 .pipe(bundle())
-// 	 .pipe(stream('app1.js'))
-// 	 .pipe(gulp.dest('app/js'));
-// });
+gulp.task('browserify', ['babelify'], function(){
+	 return browserify('app/js/bundle.js')
+	 .bundle()
+	 .pipe(source('app.js'))
+	 .pipe(gulp.dest('app/js'));
+});
 
-// JSX
-// gulp.task('jsx', function () {
-// 	console.log('jsx');
-
-//    return browserify({entries: 'app/jsx/app.jsx', extensions: ['.jsx'], debug: true})
-//          .transform('babelify', {presets: ['es2015', 'react']})
-//          .bundle()
-//          .pipe(source('app.js'))
-//          .pipe(gulp.dest('app/js'))
-//          .pipe(browserSync.reload({stream: true}));
-
-// });
+gulp.task('babelify', function () {
+	 return gulp.src("app/js/modules/**/*.js")
+	 .pipe(sourcemaps.init())
+	 .pipe(babel())
+	 .pipe(concat("bundle.js"))
+	 .pipe(sourcemaps.write("."))
+	 .pipe(gulp.dest("app/js"))
+});
 
 //Less
 gulp.task('less',function () {
@@ -65,6 +54,7 @@ gulp.task('scripts',function () {
 	return gulp.src([
 		'app/libs/angular/angular.min.js',
 		'app/libs/angular-animate/angular-animate.min.js',
+		'app/libs/angular-route/angular-route.min.js',
 		'app/libs/angular-aria/angular-aria.min.js',
 		'app/libs/angular-messages/angular-messages.min.js',
 		'app/libs/svg-assets-cache.js/svg-assets-cache.js',
@@ -123,7 +113,8 @@ gulp.task('clear-cache',function () {
 gulp.task('watch',['browser-sync','css-libs'],function(){
 	gulp.watch('app/less/**/*.less',['less']);
 	gulp.watch('app/**/*.html',browserSync.reload);
-	gulp.watch('app/js/**/*.js',browserSync.reload);
+	gulp.watch('app/js/modules/**/*.js',['browserify']);
+	gulp.watch('app/js/*.js',browserSync.reload);
 });
 
 // BUILD

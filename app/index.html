@@ -2,41 +2,46 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Task Manager</title>
+	<title>Project Manager</title>
 	<link rel="stylesheet" href="css/libs.min.css">
 	<link rel="stylesheet" href="css/styles.min.css">
 	<link rel="stylesheet" href="css/main.css">
 </head>
 <body ng-app="ProjectManagerApp" layout="row" ng-cloak>
-
 	<!-- Begin Side-Bar -->
    <md-sidenav layout="column" class="sidenav1" md-is-locked-open='true'>
    <!-- Begin User Profile -->
   		<div class='user-profile'>
-  			<user-profile name="Trevor Reyes" "></user-profile>
+  			<user-profile></user-profile>
   		</div>
   	<!-- End User Profile -->
 
   	<!-- Begin Project List -->
-	<md-list ng-controller="ProjectListCtrl" ng-cloak="" class="project-list">
+	<md-list ng-controller="ProjectListCtrl" ng-cloak class="project-list">
 		<!-- Begin Add Project -->
 		<md-list-item id="add-project">
 		    <p> Projects </p>
-		    <md-button class="md-icon-button" aria-label="addProject">
+		    <md-button class="md-icon-button" aria-label="addProject" ng-click="showAddProjectDialog($event)">
         	<i class="icons8-plus"></i>
-      		</md-button>
+      	</md-button>
 		</md-list-item>
 		<!-- End Add Project -->
 		<!-- Begin Projects -->
 		<md-list-item ng-repeat="project in projects">
-		    <p> {{ project.name }} </p>
-		    <span >{{ project.tasksQuantity }} </span>
+          <div class="project-list-item" tabindex="-1" ng-click="setCurrentProjectId(project.id)">
+            <p> {{ project.title }} </p>
+          <span flex></span>
+         <span >{{ project.task_count.toString() }}</span>
+          </div>
+		    
 		</md-list-item>
 		<!-- End Projects -->
 	</md-list>
   	<!-- End Project List -->
 	<!-- Begin Log Out -->
-	<div class="log-out"><a href="#">Log Out</a></div>
+	<div class="log-out-container">
+    <div class="log-out"><a href="#">Log Out</a></div>
+  </div>
   	<!-- End Log Out -->
    </md-sidenav>
   <!-- End Side-Bar -->
@@ -46,23 +51,34 @@
     <ng-view>
       <!-- Begin Toolbar -->
       <md-toolbar>
-      <div class="md-toolbar-tools">
+      <div class="md-toolbar-tools md-menu-toolbar">
       <!-- Begin Searchbar -->
       <search-bar>
-        <md-button class="md-icon-button" id="search-button" aria-label="Search" >
-          <i class="icons8-search"></i>
-        </md-button>
         <div class="search-container">
-        	<input id="search-bar" class="search-bar" type="text">
+          <md-button class="md-icon-button" id="search-button" aria-label="Search" >
+            <i class="icons8-search"></i>
+          </md-button>
+
+          <md-input-container md-no-float class="md-block search-bar" id="search-bar">
+          <input ng-model="user.address2" placeholder="Search Query">
+          </md-input-container>
         </div>
         </search-bar>
         <!-- End Searchbar -->
         <span flex=""></span>
-		<!-- Begin add-task-button -->
-        <md-button class="md-icon-button" id="add-task-button" aria-label="Add Task">
+		<!-- Begin tools button -->
+      <tools-menu>
+        <md-button class="md-icon-button" id="tools-button" aria-label="Add Task">
           <i class="icons8-more"></i>
         </md-button>
-        <!-- End add-task-button -->
+        <div class="dropdown-menu-container" id="drop-down-menu">
+          <ul class="drop-down" >
+            <li><a href="#">Delete</a></li>
+            <li><a href="#">Edit</a></li>
+          </ul>
+        </div>
+        </tools-menu>
+        <!-- End tools-button -->
       </div>
     </md-toolbar>
       <!-- End Toolbar -->
@@ -73,46 +89,22 @@
     </ng-view>
   </md-content>
   <!-- End Content -->
-	<script type="text/javascript" src="js/libs.min.js" ></script>
-	<script type="text/javascript" src="js/main.js" ></script>
-	<!-- User Profile Template -->
-	<script type="text/ng-template" id="userProfile.tmpl.html">
-	<md-card>
-  <md-card-title>
-      <div class="md-media-sm user-card-image " layout >
-        <i class="icons8-user user-image"></i>
-      </div>
-    <md-card-user-name>
-      {{name}}
-    </md-card-user-name>
-  </md-card-title>
-</md-card>
-</script>
-<!-- Task List Template -->
-<script type="text/ng-template" id="taskList.html">
-		<div layout="column" layout-align="center center" ng-controller="TaskListCtrl" ng-cloak="" class="task-list-container" layout="column" layout-align="space-between none" >
+	<!-- <script type="text/javascript" src="js/libs.min.js" ></script> -->
+   <!-- Angular Material requires Angular.js Libraries -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.5/angular-cookies.min.js"></script>
+    
+  <!-- Angular Material Library -->
+  <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+  <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  <script src="libs/moment/min/moment.min.js"></script>
 
-			<div class='tasks-for-a-day' ng-repeat="day in finalTaskList" >
-				<h4>({{day.date}})</h4>
-				<md-card class="day-card" >
-				<md-list ng-cloak="" class="task-list">
-					<md-list-item ng-repeat="task in day.tasks">
-				    <div class="task-text">
-				     {{ task }}
-				    </div>
-				    <md-divider ng-if="!$last"></md-divider> 
-					</md-list-item>
-				</md-list>
-
-				</md-card>
-
-			</div>
-			<md-button class="md-fab add-task md-primary" aria-label="Add Task" >
-            	<i class="icons8-plus"></i>
-        	</md-button>
-		</div>
-</script>
-
-
+	<script type="text/javascript" src="js/app.js" ></script>
 </body>
 </html>
