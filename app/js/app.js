@@ -41,6 +41,108 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+_main2.default.controller('TaskListCtrl', function ($scope, $mdDialog, projectService, taskService, finalTaskListService, authService) {
+  $scope.myTask = {
+    title: "",
+    description: ""
+  };
+
+  // $scope.taskList = {};
+  // var currentProjectId = projectService.getCurrentProjectId();
+  $scope.finalTaskList = [];
+
+  $scope.$on('setTaskList', function (event, projectId) {
+    setTaskList(authService.getCurrentSession(), projectId);
+  });
+
+  function setTaskList(currentSession, projectId) {
+    taskService.fetchTasks(authService.getCurrentSession(), projectId).then(function (result) {
+      console.log(result);
+      $scope.finalTaskList = finalTaskListService.formTaskList(result);
+      console.log($scope.finalTaskList);
+      $scope.$apply();
+    });
+  };
+
+  $scope.$on('switchProject', function (event, project) {
+    projectService.setCurrentProject(project);
+    currentProject = projectService.getCurrentProject();
+    formListForShow();
+  });
+
+  $scope.showAddTaskDialog = function (ev) {
+    $mdDialog.show({
+      controller: DialogController,
+      templateUrl: './js/modules/TaskList/add.task.dialog.html',
+      parent: angular.element(document.body),
+      targetEvent: ev,
+      clickOutsideToClose: true,
+      fullscreen: $scope.customFullscreen
+    }).then(function (date, text) {
+      $scope.status = 'You said the information was "' + '".';
+    }, function () {
+      $scope.status = 'You cancelled the dialog.';
+    });
+  };
+
+  function formListForShow() {
+    console.log("formListForShow");
+    $scope.finalTaskList = finalTaskListService.formTaskList(currentProject);
+  }
+
+  // push task into current project
+  function addTask(task) {
+    taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
+      taskService.fetchTasks(authService.getCurrentSession(), projectService.getCurrentProjectId()).then(function (result) {
+        $scope.finalTaskList = finalTaskListService.formTaskList(result);
+      });
+    });
+  }
+
+  function DialogController($scope, $mdDialog, taskService, projectService) {
+    $scope.hide = function () {
+      $mdDialog.hide();
+    };
+
+    $scope.cancel = function () {
+      $mdDialog.cancel();
+    };
+    $scope.answer = function (title, description) {
+
+      var task = {
+        title: title,
+        description: description
+      };
+      addTask(task);
+      $mdDialog.hide("answer");
+    };
+  }
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Task List
+_main2.default.directive('taskList', function () {
+  return {
+    restrict: 'EC',
+    templateUrl: './js/modules/TaskList/taskList.html',
+    scope: {},
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 _main2.default.service('authService', function ($http, $cookies) {
 
 	var session = "";
@@ -514,98 +616,44 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_main2.default.controller('TaskListCtrl', function ($scope, $mdDialog, projectService, taskService, finalTaskListService, authService) {
-  $scope.myTask = {
-    title: "",
-    description: ""
-  };
+// Project List
+_main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDialog, projectService, authService) {
+  // data
+  // $scope.projects = projectService.getProjects();
+  $scope.projects = [];
 
-  // $scope.taskList = {};
-  // var currentProjectId = projectService.getCurrentProjectId();
-  $scope.finalTaskList = [];
-
-  $scope.$on('setTaskList', function (event, projectId) {
-    setTaskList(authService.getCurrentSession(), projectId);
-  });
-
-  function setTaskList(currentSession, projectId) {
-    taskService.fetchTasks(authService.getCurrentSession(), projectId).then(function (result) {
-      console.log(result);
-      $scope.finalTaskList = finalTaskListService.formTaskList(result);
-      console.log($scope.finalTaskList);
-      $scope.$apply();
+  $scope.$on('getProjects', function (event) {
+    var mySession = authService.getCurrentSession();
+    projectService.getUserProjects(mySession).then(function (result) {
+      $scope.projects = projectService.getProjects();
+      $scope.setCurrentProjectId($scope.projects[0].id);
+      console.log($scope.projects[0]);
     });
-  };
-
-  $scope.$on('switchProject', function (event, project) {
-    projectService.setCurrentProject(project);
-    currentProject = projectService.getCurrentProject();
-    formListForShow();
   });
-
-  $scope.showAddTaskDialog = function (ev) {
-    $mdDialog.show({
-      controller: DialogController,
-      templateUrl: '../js/modules/TaskList/add.task.dialog.html',
-      parent: angular.element(document.body),
-      targetEvent: ev,
-      clickOutsideToClose: true,
-      fullscreen: $scope.customFullscreen
-    }).then(function (date, text) {
-      $scope.status = 'You said the information was "' + '".';
-    }, function () {
-      $scope.status = 'You cancelled the dialog.';
-    });
+  // Get projects
+  $scope.setCurrentProjectId = function (projectId) {
+    console.log("setCurrentProject");
+    projectService.setCurrentProjectId(projectId);
+    $rootScope.$broadcast('setTaskList', projectId);
+    // $rootScope.$broadcast('switchProject', project);
   };
+  // end fake data
+  $scope.status = '  ';
+  $scope.customFullscreen = false;
 
-  function formListForShow() {
-    console.log("formListForShow");
-    $scope.finalTaskList = finalTaskListService.formTaskList(currentProject);
-  }
+  $scope.showAddProjectDialog = function (ev) {
+    // Appending dialog to document.body to cover sidenav in docs app
+    var confirm = $mdDialog.prompt().clickOutsideToClose(true).title('What would you name your brand new project?').textContent('Bowser is a common name.').placeholder('Project name').ariaLabel('Project name').initialValue('Bowser').targetEvent(ev).ok('Okay!').cancel('Cancel');
 
-  // push task into current project
-  function addTask(task) {
-    taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
-      taskService.fetchTasks(authService.getCurrentSession(), projectService.getCurrentProjectId()).then(function (result) {
-        $scope.finalTaskList = finalTaskListService.formTaskList(result);
+    $mdDialog.show(confirm).then(function (result) {
+      projectService.createProject(authService.getCurrentSession(), result).then(function (result) {
+
+        $rootScope.$broadcast('getProjects');
       });
+    }, function () {
+      console.log("cancel");
+      $scope.status = 'Adding new project canceled.';
     });
-  }
-
-  function DialogController($scope, $mdDialog, taskService, projectService) {
-    $scope.hide = function () {
-      $mdDialog.hide();
-    };
-
-    $scope.cancel = function () {
-      $mdDialog.cancel();
-    };
-    $scope.answer = function (title, description) {
-
-      var task = {
-        title: title,
-        description: description
-      };
-      addTask(task);
-      $mdDialog.hide("answer");
-    };
-  }
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Task List
-_main2.default.directive('taskList', function () {
-  return {
-    restrict: 'EC',
-    templateUrl: './js/modules/TaskList/taskList.html',
-    scope: {},
-    controller: function controller($scope) {}
   };
 });
 'use strict';
@@ -719,54 +767,6 @@ _main2.default.directive('toolsMenu', function () {
         }
       });
     }
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Project List
-_main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDialog, projectService, authService) {
-  // data
-  // $scope.projects = projectService.getProjects();
-  $scope.projects = [];
-
-  $scope.$on('getProjects', function (event) {
-    var mySession = authService.getCurrentSession();
-    projectService.getUserProjects(mySession).then(function (result) {
-      $scope.projects = projectService.getProjects();
-      $scope.setCurrentProjectId($scope.projects[0].id);
-      console.log($scope.projects[0]);
-    });
-  });
-  // Get projects
-  $scope.setCurrentProjectId = function (projectId) {
-    console.log("setCurrentProject");
-    projectService.setCurrentProjectId(projectId);
-    $rootScope.$broadcast('setTaskList', projectId);
-    // $rootScope.$broadcast('switchProject', project);
-  };
-  // end fake data
-  $scope.status = '  ';
-  $scope.customFullscreen = false;
-
-  $scope.showAddProjectDialog = function (ev) {
-    // Appending dialog to document.body to cover sidenav in docs app
-    var confirm = $mdDialog.prompt().clickOutsideToClose(true).title('What would you name your brand new project?').textContent('Bowser is a common name.').placeholder('Project name').ariaLabel('Project name').initialValue('Bowser').targetEvent(ev).ok('Okay!').cancel('Cancel');
-
-    $mdDialog.show(confirm).then(function (result) {
-      projectService.createProject(authService.getCurrentSession(), result).then(function (result) {
-
-        $rootScope.$broadcast('getProjects');
-      });
-    }, function () {
-      console.log("cancel");
-      $scope.status = 'Adding new project canceled.';
-    });
   };
 });
 'use strict';
