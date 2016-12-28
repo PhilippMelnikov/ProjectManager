@@ -41,108 +41,6 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_main2.default.controller('TaskListCtrl', function ($scope, $mdDialog, projectService, taskService, finalTaskListService, authService) {
-  $scope.myTask = {
-    title: "",
-    description: ""
-  };
-
-  // $scope.taskList = {};
-  // var currentProjectId = projectService.getCurrentProjectId();
-  $scope.finalTaskList = [];
-
-  $scope.$on('setTaskList', function (event, projectId) {
-    setTaskList(authService.getCurrentSession(), projectId);
-  });
-
-  function setTaskList(currentSession, projectId) {
-    taskService.fetchTasks(authService.getCurrentSession(), projectId).then(function (result) {
-      console.log(result);
-      $scope.finalTaskList = finalTaskListService.formTaskList(result);
-      console.log($scope.finalTaskList);
-      $scope.$apply();
-    });
-  };
-
-  $scope.$on('switchProject', function (event, project) {
-    projectService.setCurrentProject(project);
-    currentProject = projectService.getCurrentProject();
-    formListForShow();
-  });
-
-  $scope.showAddTaskDialog = function (ev) {
-    $mdDialog.show({
-      controller: DialogController,
-      templateUrl: './js/modules/TaskList/add.task.dialog.html',
-      parent: angular.element(document.body),
-      targetEvent: ev,
-      clickOutsideToClose: true,
-      fullscreen: $scope.customFullscreen
-    }).then(function (date, text) {
-      $scope.status = 'You said the information was "' + '".';
-    }, function () {
-      $scope.status = 'You cancelled the dialog.';
-    });
-  };
-
-  function formListForShow() {
-    console.log("formListForShow");
-    $scope.finalTaskList = finalTaskListService.formTaskList(currentProject);
-  }
-
-  // push task into current project
-  function addTask(task) {
-    taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
-      taskService.fetchTasks(authService.getCurrentSession(), projectService.getCurrentProjectId()).then(function (result) {
-        $scope.finalTaskList = finalTaskListService.formTaskList(result);
-      });
-    });
-  }
-
-  function DialogController($scope, $mdDialog, taskService, projectService) {
-    $scope.hide = function () {
-      $mdDialog.hide();
-    };
-
-    $scope.cancel = function () {
-      $mdDialog.cancel();
-    };
-    $scope.answer = function (title, description) {
-
-      var task = {
-        title: title,
-        description: description
-      };
-      addTask(task);
-      $mdDialog.hide("answer");
-    };
-  }
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Task List
-_main2.default.directive('taskList', function () {
-  return {
-    restrict: 'EC',
-    templateUrl: './js/modules/TaskList/taskList.html',
-    scope: {},
-    controller: function controller($scope) {}
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 _main2.default.service('authService', function ($http, $cookies) {
 
 	var session = "";
@@ -664,6 +562,157 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+_main2.default.controller('TaskListCtrl', function ($scope, $mdDialog, projectService, taskService, finalTaskListService, authService) {
+  $scope.myTask = {
+    title: "",
+    description: ""
+  };
+
+  // $scope.taskList = {};
+  // var currentProjectId = projectService.getCurrentProjectId();
+  $scope.finalTaskList = [];
+
+  $scope.$on('setTaskList', function (event, projectId) {
+    setTaskList(authService.getCurrentSession(), projectId);
+  });
+
+  function setTaskList(currentSession, projectId) {
+    taskService.fetchTasks(authService.getCurrentSession(), projectId).then(function (result) {
+      console.log(result);
+      $scope.finalTaskList = finalTaskListService.formTaskList(result);
+      console.log($scope.finalTaskList);
+      $scope.$apply();
+    });
+  };
+
+  $scope.$on('switchProject', function (event, project) {
+    projectService.setCurrentProject(project);
+    currentProject = projectService.getCurrentProject();
+    formListForShow();
+  });
+
+  $scope.showAddTaskDialog = function (ev) {
+    $mdDialog.show({
+      controller: DialogController,
+      templateUrl: 'js/modules/TaskList/add.task.dialog.html',
+      parent: angular.element(document.body),
+      targetEvent: ev,
+      clickOutsideToClose: true,
+      fullscreen: $scope.customFullscreen
+    }).then(function (date, text) {
+      $scope.status = 'You said the information was "' + '".';
+    }, function () {
+      $scope.status = 'You cancelled the dialog.';
+    });
+  };
+
+  function formListForShow() {
+    console.log("formListForShow");
+    $scope.finalTaskList = finalTaskListService.formTaskList(currentProject);
+  }
+
+  // push task into current project
+  function addTask(task) {
+    taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
+      taskService.fetchTasks(authService.getCurrentSession(), projectService.getCurrentProjectId()).then(function (result) {
+        $scope.finalTaskList = finalTaskListService.formTaskList(result);
+      });
+    });
+  }
+
+  function DialogController($scope, $mdDialog, taskService, projectService) {
+    $scope.hide = function () {
+      $mdDialog.hide();
+    };
+
+    $scope.cancel = function () {
+      $mdDialog.cancel();
+    };
+    $scope.answer = function (title, description) {
+
+      var task = {
+        title: title,
+        description: description
+      };
+      addTask(task);
+      $mdDialog.hide("answer");
+    };
+  }
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Task List
+_main2.default.directive('taskList', function () {
+  return {
+    restrict: 'EC',
+    templateUrl: './js/modules/TaskList/taskList.html',
+    scope: {},
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.controller('userProfileCtrl', function ($scope, $rootScope, authService) {
+	// Begin getting Session
+	$scope.session = "";
+	$scope.account = {};
+
+	$scope.setAccount = function (account) {
+		$scope.account = account;
+	};
+
+	authService.getSession().then(function (result) {
+		$scope.session = result;
+		console.log("session check");
+		return authService.checkSession(result);
+	}).then(function (result) {
+		console.log("fetch account");
+		return authService.fetchAccount(result);
+	}).then(function (result) {
+		$scope.setAccount(result);
+		// $scope.$apply();
+		// console.log('apply');
+		$rootScope.$broadcast('getProjects', $scope.session);
+		$rootScope.$broadcast('setSession', $scope.session);
+	});
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('userProfile', function () {
+  return {
+    restrict: 'E',
+    templateUrl: './js/modules/User/userProfile.tmpl.html',
+    scope: {},
+    controller: function controller($scope) {}
+
+  };
+}); // User Profile
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 // Seach Bar
 _main2.default.directive('searchBar', function () {
   return {
@@ -769,55 +818,6 @@ _main2.default.directive('toolsMenu', function () {
     }
   };
 });
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.controller('userProfileCtrl', function ($scope, $rootScope, authService) {
-	// Begin getting Session
-	$scope.session = "";
-	$scope.account = {};
-
-	$scope.setAccount = function (account) {
-		$scope.account = account;
-	};
-
-	authService.getSession().then(function (result) {
-		$scope.session = result;
-		console.log("session check");
-		return authService.checkSession(result);
-	}).then(function (result) {
-		console.log("fetch account");
-		return authService.fetchAccount(result);
-	}).then(function (result) {
-		$scope.setAccount(result);
-		// $scope.$apply();
-		// console.log('apply');
-		$rootScope.$broadcast('getProjects', $scope.session);
-		$rootScope.$broadcast('setSession', $scope.session);
-	});
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.directive('userProfile', function () {
-  return {
-    restrict: 'E',
-    templateUrl: './js/modules/User/userProfile.tmpl.html',
-    scope: {},
-    controller: function controller($scope) {}
-
-  };
-}); // User Profile
 
 
 },{"./modules/main":2}],2:[function(require,module,exports){
