@@ -1,0 +1,21 @@
+<div layout="column" layout-align="center center" ng-controller="TaskListCtrl" ng-cloak="" class="task-list-container" layout="column" layout-align="space-between none" >
+
+			<div class='tasks-for-a-day' ng-repeat="day in finalTaskList" >
+				<h4>{{day.dayOfWeek}} <span>({{day.date}})</span></h4>
+				<md-card class="day-card" >
+				<md-list ng-cloak="">
+					<md-list-item ng-repeat="task in day.tasks" class="task-list-item">
+				    <div class="task-text">
+				     {{ task.title }}
+				    </div>
+				    <md-divider ng-if="!$last"></md-divider> 
+					</md-list-item>
+				</md-list>
+
+				</md-card>
+
+			</div>
+			<md-button class="md-fab add-task md-primary" aria-label="Add Task" ng-click="showAddTaskDialog($event)">
+            	<i class="icons8-plus"></i>
+      		</md-button>
+</div>

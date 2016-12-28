@@ -1,0 +1,10 @@
+<md-card  ng-controller="userProfileCtrl">
+  <md-card-title>
+      <div class="md-media-sm user-card-image " layout >
+        <img src={{account.image_url}} alt="" class="user-image">
+      </div>
+    <md-card-user-name ng-model='account'>
+    {{ account.username }}
+    </md-card-user-name>
+  </md-card-title>
+</md-card>
