@@ -101,6 +101,10 @@ md-card-user-name {
   margin: 0 0;
 }
 .project-list md-list-item.md-no-proxy {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
   cursor: pointer;
   padding: 0 0px;
   -webkit-border-radius: 5px;
