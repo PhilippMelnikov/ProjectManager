@@ -120,7 +120,6 @@ md-card-user-name
 	}
 	md-list-item.md-no-proxy
 	{
-		display: flex;
 		cursor: pointer;
 		padding: 0 0px; 
 		border-radius: 5px;
@@ -133,21 +132,26 @@ md-card-user-name
 	}
 	.project-list-item
 	{
-		display: inline-block;
+		display: inline-flex;
+        align-content: center;
 		width: 100%;
 		height: 40px;
 		line-height: 40px;
 		padding: 0 16px;
-		p
+		p.ng-binding
 		{
-			display: inline-block;
-			float: left;
+			 display: block;
+			  -webkit-margin-before: 0em;
+			  -webkit-margin-after: 0em;
+			  -webkit-margin-start: 0px;
+			  -webkit-margin-end: 0px;
+			 padding: 0;
 		}
-		span
-		{
-			display: inline-block;
-			float: right;
-		}
+		// span
+		// {
+		// 	display: inline-block;
+		// 	float: right;
+		// }
 	}
 	
 }
