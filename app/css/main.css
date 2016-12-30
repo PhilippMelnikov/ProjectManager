@@ -410,6 +410,9 @@ md-toolbar {
 .unscrollable {
   overflow: hidden;
 }
+.hidden {
+  display: none;
+}
 .new-title {
   width: 100%;
 }
