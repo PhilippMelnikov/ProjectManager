@@ -2,35 +2,7 @@ import app from './modules/main'
 
 app.service('projectService', function($http) {
 
-   var task = {
-    id: 0,
-    date: new Date(),
-    text: "Hello and welcome to Mega Ultra Super Project Manager aka MUSPM!"
-    };
-
-  var projectList = [
-    { 
-      id: 0,
-      name: 'Private',
-      tasks: [task], 
-      tasksQuantity: 1,
-      tasksIdCount: 1   
-    },
-    { 
-      id: 1,
-      name: 'Decode', 
-      tasks: [],
-      tasksQuantity: 0,
-      tasksIdCount: 0  
-    },
-    { 
-      id: 2,
-      name: 'Family', 
-      tasks: [],
-      tasksQuantity: 0,
-      tasksIdCount: 0   
-    }
-  ];
+  var projectList = [];
 
   // var createProject = function (name)
   // {
@@ -64,6 +36,59 @@ app.service('projectService', function($http) {
         {
           console.log('Project creation failed', response.status);
           reject('Project creation failed');
+        }
+      });
+    });
+  }
+
+  var editProject = function (session, title)
+  {
+    console.log("session:", session, "title:", title);
+    return new Promise(function(resolve, reject){
+      var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/projects/project';
+      $http({
+        url: string,
+        method: 'POST',
+        data: {session: session, Project: {id: currentProjectId, title: title}},
+        headers: {'Content-Type': 'application/json'}
+      })        
+      .then(function(response){
+        console.log('check result', response)
+        if (response.status == 200) 
+        {
+          console.log('Project has been updated');
+          resolve("success");
+        }
+        else 
+        {
+          console.log('Project update failed', response.status);
+          reject('Project update failed');
+        }
+      });
+    });
+  }
+
+   var deleteProject = function (session)
+  {
+    console.log("Delete project:", currentProjectId);
+    return new Promise(function(resolve, reject){
+      var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/projects/project';
+      $http({
+        url: string,
+        method: 'DELETE',
+        params: {session: session, project_id: currentProjectId}
+      })        
+      .then(function(response){
+        console.log('check result', response)
+        if (response.status == 200) 
+        {
+          console.log('Project has been deleted');
+          resolve("success");
+        }
+        else 
+        {
+          console.log('Project removal failed', response.status);
+          reject('Project removal failed');
         }
       });
     });
@@ -118,25 +143,17 @@ app.service('projectService', function($http) {
     });
   };
 
-   var addTask = function(newObj) {
-    console.log(currentProject);
-    currentProject.tasks.push(newObj);
-  };
-
-  var getTasks = function(){
-      return currentProject.tasks;
-  };
-
 
   return {
     getUserProjects: getUserProjects,
     createProject: createProject,
+    editProject: editProject,
+    deleteProject: deleteProject,
     addProject: addProject,
     getProjects: getProjects,
     setCurrentProjectId: setCurrentProjectId,
-    getCurrentProjectId: getCurrentProjectId,
-    addTask: addTask,
-    getTasks: getTasks
+    getCurrentProjectId: getCurrentProjectId
+
 
   };
 

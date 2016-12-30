@@ -428,16 +428,31 @@ md-toolbar
 	left: 0;
 	width: 100%;
 	height: 100%;
+	background-color: #fff;
+	z-index: 65;
+	.loading-content
+	{
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		text-align: center;
+		.dots
+		{
+			width: 100%;
+			text-align: center;
+		}
+	}
 	span {
 	display: block; 
 	margin: 0 auto;
 	}
 
 span[class*="l-"] {
-	height: 4px; width: 4px;
+	height: 6px; width: 6px;
 	background: #000;
 	display: inline-block;
-	margin: 12px 2px;
+	margin: 12px 6px;
 	
 	border-radius: 100%;
 
@@ -454,6 +469,46 @@ span.l-5 {animation-delay: 0.2s;}
 span.l-6 {animation-delay: 0;}
 }
 
+.unscrollable
+{
+	overflow: hidden;
+}
+
+.new-title
+{
+	width: 100%;
+}
+
+.dialogdemoBasicUsage #popupContainer {
+  position: relative; }
+
+.dialogdemoBasicUsage .footer {
+  width: 100%;
+  text-align: center;
+  margin-left: 20px; }
+
+.dialogdemoBasicUsage .footer, .dialogdemoBasicUsage .footer  {
+	code 
+	{
+  		font-size: 0.8em;
+  		margin-top: 50px;
+ 	} 
+}
+
+.dialogdemoBasicUsage button {
+  width: 200px; }
+
+.dialogdemoBasicUsage div#status {
+  color: #c60008; }
+
+.dialogdemoBasicUsage .dialog-demo-prerendered md-checkbox {
+  margin-bottom: 0; }
+
+.current-project
+{
+	background-color: rgba(255,255,255,0.1);
+	border-radius: 5px;
+}
 @keyframes appear
 {
 	0%{opacity: 0;}

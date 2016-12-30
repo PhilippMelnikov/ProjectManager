@@ -112,6 +112,7 @@ gulp.task('clear-cache',function () {
 //WATCH
 gulp.task('watch',['browser-sync','css-libs'],function(){
 	gulp.watch('app/less/**/*.less',['less']);
+	gulp.watch('app/css/**/*.css',browserSync.reload);
 	gulp.watch('app/**/*.html',browserSync.reload);
 	gulp.watch('app/js/modules/**/*.js',['browserify']);
 	gulp.watch('app/js/*.js',browserSync.reload);
