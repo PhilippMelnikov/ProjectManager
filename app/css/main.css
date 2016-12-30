@@ -49,14 +49,14 @@ md-sidenav md-card md-card-title {
 }
 .user-card-image:after {
   content: "";
-  height: 50px;
-  width: 50px;
+  height: 48px;
+  width: 48px;
   border: 1px solid #fff;
   -webkit-border-radius: 50%;
           border-radius: 50%;
   position: absolute;
-  top: -4px;
-  left: -4px;
+  top: -3.5px;
+  left: -3.3px;
 }
 md-card-user-name {
   display: inline-block;
