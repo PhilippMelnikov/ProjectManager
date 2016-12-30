@@ -14,6 +14,12 @@ import app from './modules/main'
         var clickPermission = true;
         dropMenu.attr('tabindex',-1);
 
+        dropMenu.children().on('click', function () {
+          active = !active;
+        });
+
+
+
         toolsButton.on('click', function (event) {
           if (clickPermission)
           {
@@ -62,6 +68,8 @@ import app from './modules/main'
           }
           
         });
+
+
 
       }
     };

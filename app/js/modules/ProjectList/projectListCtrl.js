@@ -15,15 +15,7 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
   $scope.newTitle = "";
 
   $scope.$on('getProjects', function (event) {
-    var mySession = authService.getCurrentSession();
-    projectService.getUserProjects(mySession)
-    .then(function(result){
-      $scope.projects.setProjects(projectService.getProjects());
-      $scope.setCurrentProjectId($scope.projects.projects[0].id);
-      console.log($scope.projects.projects[0]);
-      loadingScreenService.hide();
-      // $('.loading-screen').addClass('hidden');
-    });
+    getProjects();
   });
 
    $scope.$on('editProject', function (event, newTitle) {
@@ -39,6 +31,7 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
     projectService.deleteProject(authService.getCurrentSession())
     .then(function (result) {
       getProjects ();
+
     });
    });
 
@@ -53,21 +46,24 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
 
       $scope.projects.setProjects(projects);
       loadingScreenService.hide();
+      $scope.setCurrentProjectId(undefined, $scope.projects.projects[0].id);
     });
-       $scope.$apply();
       console.log("new Projects",$scope.projects.projects);
       // $scope.$apply();
     });
 
   }
   // Get projects
-  $scope.setCurrentProjectId = function (event,projectId) {
-    console.log("setCurrentProject");
-    if(event.target)
-    {
-      var projectListElements = document.getElementsByClassName("current-project");
-      angular.element(projectListElements).removeClass("current-project");
-      angular.element(event.target).parent().addClass("current-project");
+  $scope.setCurrentProjectId = function (event, projectId) {
+    console.log("setCurrentProject", projectId);
+    if(event)
+   {   
+       if(event.target)
+       {
+         var projectListElements = document.getElementsByClassName("current-project");
+         angular.element(projectListElements).removeClass("current-project");
+         angular.element(event.target).parent().addClass("current-project");
+       }
     }
     projectService.setCurrentProjectId(projectId);
     $rootScope.$broadcast('setTaskList', projectId);

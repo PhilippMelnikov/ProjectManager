@@ -41,99 +41,6 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Project List
-_main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDialog, projectService, authService, loadingScreenService) {
-  // data
-  // $scope.projects = projectService.getProjects();
-  $scope.projects = {
-    projects: [],
-    setProjects: function setProjects(projects) {
-      this.projects = projects;
-    }
-  };
-  $scope.status = '  ';
-  $scope.customFullscreen = false;
-  $scope.newTitle = "";
-
-  $scope.$on('getProjects', function (event) {
-    var mySession = authService.getCurrentSession();
-    projectService.getUserProjects(mySession).then(function (result) {
-      $scope.projects.setProjects(projectService.getProjects());
-      $scope.setCurrentProjectId($scope.projects.projects[0].id);
-      console.log($scope.projects.projects[0]);
-      loadingScreenService.hide();
-      // $('.loading-screen').addClass('hidden');
-    });
-  });
-
-  $scope.$on('editProject', function (event, newTitle) {
-    loadingScreenService.show();
-    projectService.editProject(authService.getCurrentSession(), newTitle).then(function (result) {
-      getProjects();
-    });
-  });
-
-  $scope.$on('deleteProject', function (event) {
-    loadingScreenService.show();
-    projectService.deleteProject(authService.getCurrentSession()).then(function (result) {
-      getProjects();
-    });
-  });
-
-  function getProjects() {
-
-    projectService.getUserProjects(authService.getCurrentSession()).then(function (result) {
-
-      var projects = projectService.getProjects();
-
-      $scope.$apply(function () {
-
-        $scope.projects.setProjects(projects);
-        loadingScreenService.hide();
-      });
-      $scope.$apply();
-      console.log("new Projects", $scope.projects.projects);
-      // $scope.$apply();
-    });
-  }
-  // Get projects
-  $scope.setCurrentProjectId = function (event, projectId) {
-    console.log("setCurrentProject");
-    if (event.target) {
-      var projectListElements = document.getElementsByClassName("current-project");
-      angular.element(projectListElements).removeClass("current-project");
-      angular.element(event.target).parent().addClass("current-project");
-    }
-    projectService.setCurrentProjectId(projectId);
-    $rootScope.$broadcast('setTaskList', projectId);
-    // $rootScope.$broadcast('switchProject', project);
-  };
-  // end fake data
-
-  $scope.showAddProjectDialog = function (ev) {
-    // Appending dialog to document.body to cover sidenav in docs app
-    var confirm = $mdDialog.prompt().clickOutsideToClose(true).title('What would you name your brand new project?').textContent('Bowser is a common name.').placeholder('Project name').ariaLabel('Project name').initialValue('Bowser').targetEvent(ev).ok('Okay!').cancel('Cancel');
-
-    $mdDialog.show(confirm).then(function (result) {
-      loadingScreenService.show();
-      projectService.createProject(authService.getCurrentSession(), result).then(function (result) {
-
-        $rootScope.$broadcast('getProjects');
-      });
-    }, function () {
-      console.log("cancel");
-      $scope.status = 'Adding new project canceled.';
-    });
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 _main2.default.service('authService', function ($http, $cookies) {
 
 	var session = "";
@@ -449,6 +356,7 @@ _main2.default.service('projectService', function ($http) {
 
   var setCurrentProjectId = function setCurrentProjectId(id) {
     currentProjectId = id;
+    console.log('currentProjectId: ', currentProjectId);
   };
 
   var getCurrentProjectId = function getCurrentProjectId() {
@@ -631,6 +539,94 @@ _main2.default.service('taskService', function ($http) {
     updateTask: updateTask,
     deleteTask: deleteTask
 
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Project List
+_main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDialog, projectService, authService, loadingScreenService) {
+  // data
+  // $scope.projects = projectService.getProjects();
+  $scope.projects = {
+    projects: [],
+    setProjects: function setProjects(projects) {
+      this.projects = projects;
+    }
+  };
+  $scope.status = '  ';
+  $scope.customFullscreen = false;
+  $scope.newTitle = "";
+
+  $scope.$on('getProjects', function (event) {
+    getProjects();
+  });
+
+  $scope.$on('editProject', function (event, newTitle) {
+    loadingScreenService.show();
+    projectService.editProject(authService.getCurrentSession(), newTitle).then(function (result) {
+      getProjects();
+    });
+  });
+
+  $scope.$on('deleteProject', function (event) {
+    loadingScreenService.show();
+    projectService.deleteProject(authService.getCurrentSession()).then(function (result) {
+      getProjects();
+    });
+  });
+
+  function getProjects() {
+
+    projectService.getUserProjects(authService.getCurrentSession()).then(function (result) {
+
+      var projects = projectService.getProjects();
+
+      $scope.$apply(function () {
+
+        $scope.projects.setProjects(projects);
+        loadingScreenService.hide();
+        $scope.setCurrentProjectId(undefined, $scope.projects.projects[0].id);
+      });
+      console.log("new Projects", $scope.projects.projects);
+      // $scope.$apply();
+    });
+  }
+  // Get projects
+  $scope.setCurrentProjectId = function (event, projectId) {
+    console.log("setCurrentProject", projectId);
+    if (event) {
+      if (event.target) {
+        var projectListElements = document.getElementsByClassName("current-project");
+        angular.element(projectListElements).removeClass("current-project");
+        angular.element(event.target).parent().addClass("current-project");
+      }
+    }
+    projectService.setCurrentProjectId(projectId);
+    $rootScope.$broadcast('setTaskList', projectId);
+    // $rootScope.$broadcast('switchProject', project);
+  };
+  // end fake data
+
+  $scope.showAddProjectDialog = function (ev) {
+    // Appending dialog to document.body to cover sidenav in docs app
+    var confirm = $mdDialog.prompt().clickOutsideToClose(true).title('What would you name your brand new project?').textContent('Bowser is a common name.').placeholder('Project name').ariaLabel('Project name').initialValue('Bowser').targetEvent(ev).ok('Okay!').cancel('Cancel');
+
+    $mdDialog.show(confirm).then(function (result) {
+      loadingScreenService.show();
+      projectService.createProject(authService.getCurrentSession(), result).then(function (result) {
+
+        $rootScope.$broadcast('getProjects');
+      });
+    }, function () {
+      console.log("cancel");
+      $scope.status = 'Adding new project canceled.';
+    });
   };
 });
 'use strict';
@@ -899,6 +895,10 @@ _main2.default.directive('toolsMenu', function () {
       var active = false;
       var clickPermission = true;
       dropMenu.attr('tabindex', -1);
+
+      dropMenu.children().on('click', function () {
+        active = !active;
+      });
 
       toolsButton.on('click', function (event) {
         if (clickPermission) {
