@@ -55,8 +55,11 @@ md-sidenav md-card md-card-title {
   -webkit-border-radius: 50%;
           border-radius: 50%;
   position: absolute;
-  top: -3.5px;
-  left: -3.3px;
+  top: 0px;
+  left: 0px;
+  -webkit-transform: translate(-7%, -6%);
+      -ms-transform: translate(-7%, -6%);
+          transform: translate(-7%, -6%);
 }
 md-card-user-name {
   display: inline-block;
