@@ -1,0 +1,25 @@
+ <md-dialog aria-label="Edit Project Dialog">
+  <form ng-cloak>
+    <md-dialog-content>
+      <div class="md-dialog-content add-task-form">
+        <h3>Type a new title for your project</h3>
+        <form name="addTaskForm">
+          <md-input-container class="new-title"> 
+            <label>Project title</label>
+            <input ng-model="newProjectTitle">
+          </md-input-container>
+        </form>
+      </div>
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+      <md-button ng-click="cancel()">
+        Cancel
+      </md-button>
+      <!-- <span flex></span> -->
+      <md-button ng-click="answer(newProjectTitle)">
+        Add
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

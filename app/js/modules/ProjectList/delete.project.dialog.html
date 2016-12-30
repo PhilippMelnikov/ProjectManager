@@ -1,0 +1,19 @@
+ <md-dialog aria-label="Delete Project Dialog">
+  <form ng-cloak>
+    <md-dialog-content>
+      <div class="md-dialog-content add-task-form">
+        <h3>Do you really want to delete your project</h3>
+      </div>
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+      <md-button ng-click="cancel()">
+        Cancel
+      </md-button>
+      <!-- <span flex></span> -->
+      <md-button ng-click="confirmDelete()">
+        Delete
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>
