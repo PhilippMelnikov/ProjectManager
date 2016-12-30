@@ -65,9 +65,9 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
     console.log("setCurrentProject");
     if(event.target)
     {
-      var projectListElements = document.getElementsByClassName("project-list-item");
+      var projectListElements = document.getElementsByClassName("current-project");
       angular.element(projectListElements).removeClass("current-project");
-      angular.element(event.target).addClass("current-project");
+      angular.element(event.target).parent().addClass("current-project");
     }
     projectService.setCurrentProjectId(projectId);
     $rootScope.$broadcast('setTaskList', projectId);
