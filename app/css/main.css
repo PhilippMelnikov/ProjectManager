@@ -144,7 +144,7 @@ md-card-user-name {
   font-size: 13px;
   color: #fff;
   position: absolute;
-  bottom: 35px;
+  bottom: 20px;
   left: 15px;
 }
 .log-out a {
@@ -185,6 +185,7 @@ md-toolbar {
   height: 60px;
   width: 130px;
   padding: 0;
+  margin-top: 0;
   -webkit-box-shadow: 1px 8px 20px 2px rgba(184, 184, 184, 0.5);
           box-shadow: 1px 8px 20px 2px rgba(184, 184, 184, 0.5);
   overflow: hidden;
