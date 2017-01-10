@@ -544,8 +544,6 @@ md-toolbar {
   line-height: 25px;
 }
 .right-sidenav md-content .delete-warning {
-  font-family: 'Lato';
-  font-weight: 400;
   text-align: center;
 }
 .right-sidenav-top {
