@@ -1,8 +1,6 @@
 app = angular.module('ProjectManagerApp', ['ngMaterial', 'ngMessages']);
 
-app.config(function ($mdThemingProvider, $locationProvider) {
-
-   $locationProvider.html5Mode(true);
+app.config(function ($mdThemingProvider) {
 
    var customPrimary = {
         '50': '#b6b6cd',
