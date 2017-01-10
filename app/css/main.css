@@ -340,8 +340,8 @@ md-toolbar {
   position: absolute;
   left: -20px;
   bottom: 50%;
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   -webkit-border-radius: 50%;
           border-radius: 50%;
   border: 3px solid #bdbdbd;
