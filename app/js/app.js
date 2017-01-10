@@ -201,6 +201,7 @@ _main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDi
     $scope.$parent.untoggle();
     loadingScreenService.show();
     projectService.deleteProject(authService.getCurrentSession()).then(function (result) {
+      $scope.firstTime = true;
       getProjects();
     });
   });
@@ -430,50 +431,29 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Seach Bar
-_main2.default.directive('searchBar', function () {
-  return {
-    restrict: 'E',
-    link: function link(scope, element, attrs) {
+_main2.default.controller('userProfileCtrl', function ($scope, $rootScope, authService) {
+	// Begin getting Session
+	$scope.session = "";
+	$scope.account = {};
 
-      var searchButton = $("#search-button");;
-      var searchBar = $("#search-bar");
-      var active = false;
-      var clickPermission = true;
+	$scope.setAccount = function (account) {
+		$scope.account = account;
+	};
 
-      function activateDisactivateSearchBar() {
-        if (clickPermission) {
-          clickPermission = false;
-          setTimeout(function () {
-            clickPermission = true;
-          }, 200);
-          event.preventDefault();
-          active = !active;
-          if (active) {
-            searchBar.removeClass('not-active');
-            searchBar.addClass('active');
-            searchBar.find("input").focus();
-          } else {
-            searchBar.addClass('not-active');
-            setTimeout(function () {
-              searchBar.removeClass('active');
-              searchBar.find("input").val("");
-            }, 200);
-          }
-        } else {
-          console.log("doubleClick");
-        }
-      }
-
-      searchButton.on('click', function () {
-        activateDisactivateSearchBar();
-      });
-
-      searchBar.focusout(function (event) {
-        activateDisactivateSearchBar();
-      });
-    }
-  };
+	authService.getSession().then(function (result) {
+		$scope.session = result;
+		console.log("session check");
+		return authService.checkSession(result);
+	}).then(function (result) {
+		console.log("fetch account");
+		return authService.fetchAccount(result);
+	}).then(function (result) {
+		$scope.setAccount(result);
+		// $scope.$apply();
+		// console.log('apply');
+		$rootScope.$broadcast('getProjects', $scope.session);
+		$rootScope.$broadcast('setSession', $scope.session);
+	});
 });
 'use strict';
 
@@ -483,152 +463,15 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Project List
-_main2.default.controller('toolbarCtrl', function ($scope, $rootScope, $mdDialog) {
-
-  $scope.newProjectTitle = "";
-
-  var editProject = function editProject(newTitle) {
-    $rootScope.$broadcast('editProject', newTitle);
-  };
-
-  var deleteProject = function deleteProject() {
-    console.log("deleteProject");
-    $rootScope.$broadcast('deleteProject');
-  };
-
-  $scope.showEditProjectDialog = function (ev) {
-    $mdDialog.show({
-      controller: DialogController,
-      templateUrl: 'js/modules/ProjectList/edit.project.dialog.html',
-      parent: angular.element(document.body),
-      targetEvent: ev,
-      clickOutsideToClose: true,
-      fullscreen: $scope.customFullscreen
-    }).then(function (date, text) {
-      $scope.status = 'You said the information was "' + '".';
-    }, function () {
-      $scope.status = 'You cancelled the dialog.';
-    });
-  };
-
-  function DialogController($scope, $mdDialog) {
-    $scope.hide = function () {
-      $mdDialog.hide();
-    };
-
-    $scope.cancel = function () {
-      $mdDialog.cancel();
-    };
-    $scope.answer = function (newTitle) {
-
-      editProject(newTitle);
-      $mdDialog.hide("answer");
-    };
-
-    $scope.confirmDelete = function () {
-      deleteProject();
-      $mdDialog.hide("answer");
-    };
-  }
-
-  $scope.showDeleteProjectDialog = function (ev) {
-    $mdDialog.show({
-      controller: DialogController,
-      templateUrl: 'js/modules/ProjectList/delete.project.dialog.html',
-      parent: angular.element(document.body),
-      targetEvent: ev,
-      clickOutsideToClose: true,
-      fullscreen: $scope.customFullscreen
-    }).then(function (date, text) {
-      $scope.status = 'You said the information was "' + '".';
-    }, function () {
-      $scope.status = 'You cancelled the dialog.';
-    });
-  };
-
-  // $scope.showDeleteConfirm = function(ev) {
-  //   // Appending dialog to document.body to cover sidenav in docs app
-  //   var confirm = $mdDialog.confirm()
-  //         .title('You are trying to delete your project?')
-  //         .textContent('Your project will be comletely deleted.')
-  //         .ariaLabel('Delete project')
-  //         .targetEvent(ev)
-  //         .ok('Please do it!')
-  //         .cancel('No. Why would i do that?');
-
-  //   $mdDialog.show(confirm).then(function() {
-  //   	deleteProject();
-  //     $scope.status = 'You decided to get rid of your project.';
-  //   }, function() {
-  //     $scope.status = 'You decided to keep your project.';
-  //   });
-  // };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.directive('toolsMenu', function () {
+_main2.default.directive('userProfile', function () {
   return {
     restrict: 'E',
-    link: function link(scope, element, attrs) {
-      var tButton = document.getElementById("tools-button");
-      var dMenu = document.getElementById("drop-down-menu");
+    templateUrl: './js/modules/User/userProfile.tmpl.html',
+    scope: {},
+    controller: function controller($scope) {}
 
-      var toolsButton = angular.element(tButton);
-      // var dropMenu = angular.element(dMenu);
-      var dropMenu = $("#drop-down-menu");
-      var active = false;
-      var clickPermission = true;
-      dropMenu.attr('tabindex', -1);
-
-      dropMenu.children().on('click', function () {
-        active = !active;
-      });
-
-      toolsButton.on('click', function (event) {
-        if (clickPermission) {
-          clickPermission = false;
-          setTimeout(function () {
-            clickPermission = true;
-          }, 200);
-          event.preventDefault();
-          active = !active;
-          if (active) {
-
-            dropMenu.removeClass('not-active');
-            dropMenu.addClass('active');
-            dropMenu.focus();
-          } else {}
-        } else {
-          console.log("doubleClick");
-        }
-      });
-
-      dropMenu.focusout(function (event) {
-        if (clickPermission) {
-          clickPermission = false;
-          setTimeout(function () {
-            clickPermission = true;
-          }, 200);
-          event.preventDefault();
-          active = !active;
-          dropMenu.addClass('not-active');
-          setTimeout(function () {
-            dropMenu.removeClass('active');
-          }, 200);
-        } else {
-          console.log("doubleClick");
-        }
-      });
-    }
   };
-});
+}); // User Profile
 'use strict';
 
 var _main = require('./modules/main');
@@ -1317,29 +1160,50 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_main2.default.controller('userProfileCtrl', function ($scope, $rootScope, authService) {
-	// Begin getting Session
-	$scope.session = "";
-	$scope.account = {};
+// Seach Bar
+_main2.default.directive('searchBar', function () {
+  return {
+    restrict: 'E',
+    link: function link(scope, element, attrs) {
 
-	$scope.setAccount = function (account) {
-		$scope.account = account;
-	};
+      var searchButton = $("#search-button");;
+      var searchBar = $("#search-bar");
+      var active = false;
+      var clickPermission = true;
 
-	authService.getSession().then(function (result) {
-		$scope.session = result;
-		console.log("session check");
-		return authService.checkSession(result);
-	}).then(function (result) {
-		console.log("fetch account");
-		return authService.fetchAccount(result);
-	}).then(function (result) {
-		$scope.setAccount(result);
-		// $scope.$apply();
-		// console.log('apply');
-		$rootScope.$broadcast('getProjects', $scope.session);
-		$rootScope.$broadcast('setSession', $scope.session);
-	});
+      function activateDisactivateSearchBar() {
+        if (clickPermission) {
+          clickPermission = false;
+          setTimeout(function () {
+            clickPermission = true;
+          }, 200);
+          event.preventDefault();
+          active = !active;
+          if (active) {
+            searchBar.removeClass('not-active');
+            searchBar.addClass('active');
+            searchBar.find("input").focus();
+          } else {
+            searchBar.addClass('not-active');
+            setTimeout(function () {
+              searchBar.removeClass('active');
+              searchBar.find("input").val("");
+            }, 200);
+          }
+        } else {
+          console.log("doubleClick");
+        }
+      }
+
+      searchButton.on('click', function () {
+        activateDisactivateSearchBar();
+      });
+
+      searchBar.focusout(function (event) {
+        activateDisactivateSearchBar();
+      });
+    }
+  };
 });
 'use strict';
 
@@ -1349,15 +1213,152 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_main2.default.directive('userProfile', function () {
+// Project List
+_main2.default.controller('toolbarCtrl', function ($scope, $rootScope, $mdDialog) {
+
+  $scope.newProjectTitle = "";
+
+  var editProject = function editProject(newTitle) {
+    $rootScope.$broadcast('editProject', newTitle);
+  };
+
+  var deleteProject = function deleteProject() {
+    console.log("deleteProject");
+    $rootScope.$broadcast('deleteProject');
+  };
+
+  $scope.showEditProjectDialog = function (ev) {
+    $mdDialog.show({
+      controller: DialogController,
+      templateUrl: 'js/modules/ProjectList/edit.project.dialog.html',
+      parent: angular.element(document.body),
+      targetEvent: ev,
+      clickOutsideToClose: true,
+      fullscreen: $scope.customFullscreen
+    }).then(function (date, text) {
+      $scope.status = 'You said the information was "' + '".';
+    }, function () {
+      $scope.status = 'You cancelled the dialog.';
+    });
+  };
+
+  function DialogController($scope, $mdDialog) {
+    $scope.hide = function () {
+      $mdDialog.hide();
+    };
+
+    $scope.cancel = function () {
+      $mdDialog.cancel();
+    };
+    $scope.answer = function (newTitle) {
+
+      editProject(newTitle);
+      $mdDialog.hide("answer");
+    };
+
+    $scope.confirmDelete = function () {
+      deleteProject();
+      $mdDialog.hide("answer");
+    };
+  }
+
+  $scope.showDeleteProjectDialog = function (ev) {
+    $mdDialog.show({
+      controller: DialogController,
+      templateUrl: 'js/modules/ProjectList/delete.project.dialog.html',
+      parent: angular.element(document.body),
+      targetEvent: ev,
+      clickOutsideToClose: true,
+      fullscreen: $scope.customFullscreen
+    }).then(function (date, text) {
+      $scope.status = 'You said the information was "' + '".';
+    }, function () {
+      $scope.status = 'You cancelled the dialog.';
+    });
+  };
+
+  // $scope.showDeleteConfirm = function(ev) {
+  //   // Appending dialog to document.body to cover sidenav in docs app
+  //   var confirm = $mdDialog.confirm()
+  //         .title('You are trying to delete your project?')
+  //         .textContent('Your project will be comletely deleted.')
+  //         .ariaLabel('Delete project')
+  //         .targetEvent(ev)
+  //         .ok('Please do it!')
+  //         .cancel('No. Why would i do that?');
+
+  //   $mdDialog.show(confirm).then(function() {
+  //   	deleteProject();
+  //     $scope.status = 'You decided to get rid of your project.';
+  //   }, function() {
+  //     $scope.status = 'You decided to keep your project.';
+  //   });
+  // };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('toolsMenu', function () {
   return {
     restrict: 'E',
-    templateUrl: './js/modules/User/userProfile.tmpl.html',
-    scope: {},
-    controller: function controller($scope) {}
+    link: function link(scope, element, attrs) {
+      var tButton = document.getElementById("tools-button");
+      var dMenu = document.getElementById("drop-down-menu");
 
+      var toolsButton = angular.element(tButton);
+      // var dropMenu = angular.element(dMenu);
+      var dropMenu = $("#drop-down-menu");
+      var active = false;
+      var clickPermission = true;
+      dropMenu.attr('tabindex', -1);
+
+      dropMenu.children().on('click', function () {
+        active = !active;
+      });
+
+      toolsButton.on('click', function (event) {
+        if (clickPermission) {
+          clickPermission = false;
+          setTimeout(function () {
+            clickPermission = true;
+          }, 200);
+          event.preventDefault();
+          active = !active;
+          if (active) {
+
+            dropMenu.removeClass('not-active');
+            dropMenu.addClass('active');
+            dropMenu.focus();
+          } else {}
+        } else {
+          console.log("doubleClick");
+        }
+      });
+
+      dropMenu.focusout(function (event) {
+        if (clickPermission) {
+          clickPermission = false;
+          setTimeout(function () {
+            clickPermission = true;
+          }, 200);
+          event.preventDefault();
+          active = !active;
+          dropMenu.addClass('not-active');
+          setTimeout(function () {
+            dropMenu.removeClass('active');
+          }, 200);
+        } else {
+          console.log("doubleClick");
+        }
+      });
+    }
   };
-}); // User Profile
+});
 
 
 },{"./modules/main":2,"util":6}],2:[function(require,module,exports){
