@@ -34,6 +34,7 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
     }
 
     $scope.createProject = function(title) {
+      $scope.newProjectTitle = '';
       $rootScope.$broadcast('createProject', title);
     }
 
@@ -42,6 +43,7 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
     }
 
     $scope.editProject = function(newTitle) {
+      $scope.newProjectTitle = '';
       $rootScope.$broadcast('editProject', newTitle);
     }
  

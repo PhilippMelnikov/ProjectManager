@@ -70,6 +70,10 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
             $scope.finalTaskList = finalTaskListService.getFinalTaskList();
             console.log('final List', $scope.finalTaskList);
             $rootScope.$broadcast('taskIncrement');
+            $scope.newTask = {
+             title: "",
+            description: ""
+            };
             $scope.$apply();
             loadingScreenService.hide();
         });
