@@ -564,7 +564,7 @@ md-toolbar {
 }
 .right-sidenav-top .instruments {
   position: absolute;
-  top: 4px;
+  top: 10px;
   right: 20px;
   font-size: 17px;
   color: rgba(255, 255, 255, 0.1);
@@ -583,7 +583,7 @@ md-toolbar {
 }
 .right-sidenav-top .esc {
   position: absolute;
-  top: 12px;
+  top: 2px;
   left: 10px;
   color: #fff;
   cursor: pointer;
