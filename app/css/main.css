@@ -273,20 +273,15 @@ md-toolbar {
           animation-duration: 0.2s;
 }
 .task-list-container {
-  padding-bottom: 0px;
+  padding-bottom: 20px;
   position: relative;
-}
-.task-list-container .md-fab.add-task {
-  color: #fff;
-  font-size: 30px;
-  position: fixed;
-  bottom: 25px;
-  right: 50px;
 }
 .tasks-for-a-day {
   width: 550px;
   max-width: 550px;
   min-width: 100px;
+  -webkit-animation: appear 0.1s ease-out;
+          animation: appear 0.1s ease-out;
 }
 .tasks-for-a-day h4 {
   color: #b3bbcb;
@@ -318,24 +313,15 @@ md-toolbar {
 }
 .tasks-for-a-day .day-card .task-text {
   width: 100%;
+  height: 50px;
+  line-height: 50px;
   font-weight: 600;
   font-size: 13px;
   position: relative;
   padding: 0 30px;
 }
-.tasks-for-a-day .day-card .task-text:before {
-  content: "";
-  position: absolute;
-  left: -40px;
-  bottom: 50%;
-  width: 20px;
-  height: 20px;
-  -webkit-border-radius: 50%;
-          border-radius: 50%;
-  border: 3px solid #bdbdbd;
-  -webkit-transform: translateY(50%);
-      -ms-transform: translateY(50%);
-          transform: translateY(50%);
+.tasks-for-a-day .day-card .task-text:focus {
+  outline: 0;
 }
 .tasks-for-a-day .day-card .task-text:after {
   content: "";
@@ -348,6 +334,33 @@ md-toolbar {
   -webkit-transform: translateY(50%);
       -ms-transform: translateY(50%);
           transform: translateY(50%);
+}
+.complete {
+  content: "";
+  position: absolute;
+  left: -20px;
+  bottom: 50%;
+  width: 16px;
+  height: 16px;
+  -webkit-border-radius: 50%;
+          border-radius: 50%;
+  border: 3px solid #bdbdbd;
+  -webkit-transform: translateY(50%);
+      -ms-transform: translateY(50%);
+          transform: translateY(50%);
+}
+.complete:focus {
+  outline: 0;
+}
+.md-fab.add-task {
+  color: #fff!important;
+  font-size: 25px;
+  width: 50px;
+  height: 50px;
+  line-height: 35px;
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
 }
 .add-task-form .md-button.md-icon-button {
   margin: 0 6px 0 -9px;
@@ -453,6 +466,187 @@ md-toolbar {
   background-color: rgba(255, 255, 255, 0.1);
   -webkit-border-radius: 5px;
           border-radius: 5px;
+}
+.wrapper {
+  display: block;
+  position: relative;
+  width: 100%;
+}
+.sidenav-open {
+  -webkit-transform: translate(-100%, 0);
+      -ms-transform: translate(-100%, 0);
+          transform: translate(-100%, 0);
+  -webkit-transition: all 0.1s ease-out;
+  transition: all 0.1s ease-out;
+}
+.right-sidenav {
+  height: 100%;
+  width: 452px;
+  z-index: 65;
+  background-color: #292c33!important;
+  position: fixed;
+  top: 0;
+  left: 100%;
+  -webkit-transition: all 0.1s ease-out;
+  transition: all 0.1s ease-out;
+}
+.right-sidenav md-content {
+  background-color: #292c33;
+  text-align: center;
+}
+.right-sidenav md-content md-input-container {
+  padding-left: 70px;
+  padding-right: 70px;
+  height: 50px;
+}
+.right-sidenav md-content md-input-container label {
+  color: #fff;
+}
+.right-sidenav md-content md-input-container input {
+  color: #fff;
+  border-bottom: 1px solid #fff;
+  font-size: 13px;
+}
+.right-sidenav md-content md-input-container input::-webkit-input-placeholder {
+  color: #fff;
+}
+.right-sidenav md-content md-input-container input::-moz-placeholder {
+  color: #fff;
+}
+.right-sidenav md-content md-input-container input:-ms-input-placeholder {
+  color: #fff;
+}
+.right-sidenav md-content md-input-container input::placeholder {
+  color: #fff;
+}
+.right-sidenav md-content .md-fab.confirm-button {
+  color: #fff;
+  font-size: 25px;
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  bottom: 70px;
+  right: 25px;
+  line-height: 37px;
+}
+.right-sidenav md-content .md-fab.confirm-button i {
+  margin-left: 2px;
+}
+.right-sidenav md-content p {
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 1px;
+  font-family: 'Lato';
+  font-weight: 300;
+  max-width: 355px;
+  margin: 0 auto;
+  text-align: left;
+  line-height: 25px;
+}
+.right-sidenav md-content .delete-warning {
+  font-family: 'Lato';
+  font-weight: 400;
+  text-align: center;
+}
+.right-sidenav-top {
+  color: #fff;
+  background-color: #292c33!important;
+  text-align: center;
+  display: inline-block;
+}
+.right-sidenav-top h1 {
+  font-size: 14px;
+  font-weight: 0;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  color: #fff;
+}
+.right-sidenav-top .instruments {
+  position: absolute;
+  top: 13px;
+  right: 20px;
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  -webkit-transition: color 0.1s ease-out;
+  transition: color 0.1s ease-out;
+}
+.right-sidenav-top .instruments i {
+  margin-right: 10px;
+  cursor: pointer;
+}
+.right-sidenav-top .instruments i:hover {
+  color: rgba(255, 255, 255, 0.3);
+  -webkit-transition: color 0.1s ease-out;
+  transition: color 0.1s ease-out;
+}
+.right-sidenav-top .esc {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  color: #fff;
+  cursor: pointer;
+}
+.right-sidenav-top .esc:focus {
+  outline: 0;
+}
+.right-sidenav-top .esc .esc-icon {
+  font-size: 20px;
+  font-weight: 100;
+  margin-bottom: 0px;
+  padding-bottom: 0;
+  height: 23px;
+}
+.right-sidenav-top .esc .esc-icon i {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.right-sidenav-top .esc .esc-word {
+  padding-left: 1px;
+  margin-top: 0px;
+  padding-top: 0;
+  font-size: 7px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.darken-the-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 65;
+  -webkit-animation: appear 0.2s ease-out;
+          animation: appear 0.2s ease-out;
+}
+.fade-out {
+  -webkit-animation: disappear 0.2s ease-out;
+          animation: disappear 0.2s ease-out;
+}
+.loading-circle {
+  margin-top: 15px;
+  text-align: center;
+}
+.loading-circle img {
+  height: 40px;
+}
+.match-not-found-screen {
+  color: #b1b1c8;
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  text-align: center;
+}
+.match-not-found-screen i {
+  font-size: 180px;
+  margin-bottom: 20px;
+}
+.match-not-found-screen h3 {
+  margin-top: -10px;
 }
 @-webkit-keyframes appear {
   0% {
