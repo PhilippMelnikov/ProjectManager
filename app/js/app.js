@@ -41,6 +41,67 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+_main2.default.controller('AppCtrl', function ($scope, $rootScope, $timeout, projectService) {
+
+  $scope.newProjectTitle = '';
+  $scope.currentProject = {};
+
+  $scope.$on('setCurrentProject', function (event) {
+    $scope.currentProject = projectService.getCurrentProject();
+  });
+
+  $scope.closeRightSidenav = function () {
+    return function () {
+      console.log('closeRightSidenav');
+      var darkenTheScreen = angular.element(document.querySelector('.darken-the-screen'));
+      var myNav = angular.element(document.querySelector('.sidenav-open'));
+      myNav.removeClass('sidenav-open');
+      darkenTheScreen.addClass('fade-out');
+      $timeout(function () {
+        darkenTheScreen.removeClass('fade-out');
+        darkenTheScreen.addClass('hidden');
+      }, 180);
+    };
+  };
+
+  $scope.openRightSidenav = function (navID) {
+    return function () {
+      var darkenTheScreen = $('.darken-the-screen');
+      var myNav = $('#' + navID);
+      darkenTheScreen.removeClass('hidden');
+      myNav.addClass('sidenav-open');
+    };
+  };
+
+  $scope.createProject = function (title) {
+    $scope.newProjectTitle = '';
+    $rootScope.$broadcast('createProject', title);
+  };
+
+  $scope.deleteProject = function (title) {
+    $rootScope.$broadcast('deleteProject');
+  };
+
+  $scope.editProject = function (newTitle) {
+    $scope.newProjectTitle = '';
+    $rootScope.$broadcast('editProject', newTitle);
+  };
+
+  $scope.toggleCreateProject = $scope.openRightSidenav('create-project');
+  $scope.toggleDeleteProject = $scope.openRightSidenav('delete-project');
+  $scope.toggleEditProject = $scope.openRightSidenav('edit-project');
+  $scope.toggleCreateTask = $scope.openRightSidenav('create-task');
+  $scope.toggleOpenTask = $scope.openRightSidenav('open-task');
+  $scope.untoggle = $scope.closeRightSidenav();
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 _main2.default.directive('createProject', function () {
   return {
     restrict: 'EC',
@@ -194,65 +255,6 @@ _main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDi
     $rootScope.$broadcast('setTaskList', project);
     // $rootScope.$broadcast('switchProject', project);
   };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.controller('AppCtrl', function ($scope, $rootScope, $timeout, projectService) {
-
-  $scope.newProjectTitle = '';
-  $scope.currentProject = {};
-
-  $scope.$on('setCurrentProject', function (event) {
-    $scope.currentProject = projectService.getCurrentProject();
-  });
-
-  $scope.closeRightSidenav = function () {
-    return function () {
-      console.log('closeRightSidenav');
-      var darkenTheScreen = angular.element(document.querySelector('.darken-the-screen'));
-      var myNav = angular.element(document.querySelector('.sidenav-open'));
-      myNav.removeClass('sidenav-open');
-      darkenTheScreen.addClass('fade-out');
-      $timeout(function () {
-        darkenTheScreen.removeClass('fade-out');
-        darkenTheScreen.addClass('hidden');
-      }, 180);
-    };
-  };
-
-  $scope.openRightSidenav = function (navID) {
-    return function () {
-      var darkenTheScreen = $('.darken-the-screen');
-      var myNav = $('#' + navID);
-      darkenTheScreen.removeClass('hidden');
-      myNav.addClass('sidenav-open');
-    };
-  };
-
-  $scope.createProject = function (title) {
-    $rootScope.$broadcast('createProject', title);
-  };
-
-  $scope.deleteProject = function (title) {
-    $rootScope.$broadcast('deleteProject');
-  };
-
-  $scope.editProject = function (newTitle) {
-    $rootScope.$broadcast('editProject', newTitle);
-  };
-
-  $scope.toggleCreateProject = $scope.openRightSidenav('create-project');
-  $scope.toggleDeleteProject = $scope.openRightSidenav('delete-project');
-  $scope.toggleEditProject = $scope.openRightSidenav('edit-project');
-  $scope.toggleCreateTask = $scope.openRightSidenav('create-task');
-  $scope.toggleOpenTask = $scope.openRightSidenav('open-task');
-  $scope.untoggle = $scope.closeRightSidenav();
 });
 'use strict';
 
@@ -1039,6 +1041,10 @@ _main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialo
         $scope.finalTaskList = finalTaskListService.getFinalTaskList();
         console.log('final List', $scope.finalTaskList);
         $rootScope.$broadcast('taskIncrement');
+        $scope.newTask = {
+          title: "",
+          description: ""
+        };
         $scope.$apply();
         loadingScreenService.hide();
       });
@@ -1096,55 +1102,6 @@ _main2.default.directive('taskList', function () {
     controller: function controller($scope) {}
   };
 });
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.controller('userProfileCtrl', function ($scope, $rootScope, authService) {
-	// Begin getting Session
-	$scope.session = "";
-	$scope.account = {};
-
-	$scope.setAccount = function (account) {
-		$scope.account = account;
-	};
-
-	authService.getSession().then(function (result) {
-		$scope.session = result;
-		console.log("session check");
-		return authService.checkSession(result);
-	}).then(function (result) {
-		console.log("fetch account");
-		return authService.fetchAccount(result);
-	}).then(function (result) {
-		$scope.setAccount(result);
-		// $scope.$apply();
-		// console.log('apply');
-		$rootScope.$broadcast('getProjects', $scope.session);
-		$rootScope.$broadcast('setSession', $scope.session);
-	});
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.directive('userProfile', function () {
-  return {
-    restrict: 'E',
-    templateUrl: './js/modules/User/userProfile.tmpl.html',
-    scope: {},
-    controller: function controller($scope) {}
-
-  };
-}); // User Profile
 'use strict';
 
 var _main = require('./modules/main');
@@ -1352,6 +1309,55 @@ _main2.default.directive('toolsMenu', function () {
     }
   };
 });
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.controller('userProfileCtrl', function ($scope, $rootScope, authService) {
+	// Begin getting Session
+	$scope.session = "";
+	$scope.account = {};
+
+	$scope.setAccount = function (account) {
+		$scope.account = account;
+	};
+
+	authService.getSession().then(function (result) {
+		$scope.session = result;
+		console.log("session check");
+		return authService.checkSession(result);
+	}).then(function (result) {
+		console.log("fetch account");
+		return authService.fetchAccount(result);
+	}).then(function (result) {
+		$scope.setAccount(result);
+		// $scope.$apply();
+		// console.log('apply');
+		$rootScope.$broadcast('getProjects', $scope.session);
+		$rootScope.$broadcast('setSession', $scope.session);
+	});
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('userProfile', function () {
+  return {
+    restrict: 'E',
+    templateUrl: './js/modules/User/userProfile.tmpl.html',
+    scope: {},
+    controller: function controller($scope) {}
+
+  };
+}); // User Profile
 
 
 },{"./modules/main":2,"util":6}],2:[function(require,module,exports){
