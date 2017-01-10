@@ -23,8 +23,8 @@ app.config(function ($mdThemingProvider, $httpProvider) {
   };
   $mdThemingProvider.definePalette('customPrimary', customPrimary);
 
-  $mdThemingProvider.theme('default').primaryPalette('customPrimary').accentPalette('green');
-
+  $mdThemingProvider.theme('default').primaryPalette('customPrimary').accentPalette('red');
+  // delete $httpProvider.defaults.headers.post['Content-type']
   // $httpProvider.defaults.useXDomain = true;
   // $httpProvider.defaults.withCredentials = true;
   // delete $httpProvider.defaults.headers.common["X-Requested-With"];
@@ -33,6 +33,227 @@ app.config(function ($mdThemingProvider, $httpProvider) {
 });
 
 module.exports = app;
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('createProject', function () {
+  return {
+    restrict: 'EC',
+    templateUrl: './js/modules/ProjectList/create.project.dialog.html',
+    scope: {},
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('deleteProject', function () {
+  return {
+    restrict: 'EC',
+    templateUrl: './js/modules/ProjectList/delete.project.dialog.html',
+    scope: {},
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('editProject', function () {
+  return {
+    restrict: 'EC',
+    templateUrl: './js/modules/ProjectList/edit.project.dialog.html',
+    scope: {},
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Project List
+_main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDialog, projectService, authService, loadingScreenService) {
+  // data
+  // $scope.projects = projectService.getProjects();
+  $scope.projects = {
+    projects: [],
+    setProjects: function setProjects(projects) {
+      this.projects = projects;
+    }
+  };
+  $scope.firstTime = true;
+  $scope.status = '  ';
+  $scope.customFullscreen = false;
+  $scope.newTitle = "";
+
+  $scope.$on('getProjects', function (event) {
+    getProjects();
+  });
+
+  $scope.$on('createProject', function (event, title) {
+    $scope.$parent.untoggle();
+    loadingScreenService.show();
+    projectService.createProject(authService.getCurrentSession(), title).then(function (result) {
+      projectService.fetchProject(authService.getCurrentSession(), result).then(function (res) {
+        projectService.appendProject(res);
+        $scope.setCurrentProject(undefined, res);
+        $scope.$apply();
+      });
+    });
+  });
+
+  $scope.$on('taskIncrement', function (event) {
+    $scope.taskIncrement();
+  });
+
+  $scope.$on('taskDecrement', function (event) {
+    $scope.taskDecrement();
+  });
+
+  $scope.$on('editProject', function (event, newTitle) {
+    $scope.$parent.untoggle();
+    loadingScreenService.show();
+    projectService.editProject(authService.getCurrentSession(), newTitle).then(function (result) {
+      getProjects();
+    });
+  });
+
+  $scope.$on('deleteProject', function (event) {
+    $scope.$parent.untoggle();
+    loadingScreenService.show();
+    projectService.deleteProject(authService.getCurrentSession()).then(function (result) {
+      getProjects();
+    });
+  });
+
+  function getProjects() {
+
+    projectService.getUserProjects(authService.getCurrentSession()).then(function (result) {
+
+      var projects = projectService.getProjects();
+
+      $scope.$apply(function () {
+
+        $scope.projects.setProjects(projects);
+        loadingScreenService.hide();
+        if ($scope.firstTime) {
+          $scope.firstTime = false;
+          $scope.setCurrentProject(undefined, $scope.projects.projects[0]);
+        }
+      });
+      console.log("new Projects", $scope.projects.projects);
+    });
+  }
+
+  $scope.taskIncrement = function () {
+    $scope.projects.projects.forEach(function (elem, index, arr) {
+      if (elem.id === projectService.getCurrentProjectId()) {
+        elem.task_count = parseInt(elem.task_count, 10) + 1;
+      }
+    });
+  };
+
+  $scope.taskDecrement = function () {
+    $scope.projects.projects.forEach(function (elem, index, arr) {
+      if (elem.id === projectService.getCurrentProjectId()) {
+        elem.task_count = parseInt(elem.task_count, 10) - 1;
+      }
+    });
+  };
+
+  // Get projects
+  $scope.setCurrentProject = function (event, project) {
+    console.log("setCurrentProject", project);
+    if (event) {
+      if (event.target) {
+        var projectListElements = document.getElementsByClassName("current-project");
+        angular.element(projectListElements).removeClass("current-project");
+        angular.element(event.target).parent().addClass("current-project");
+      }
+    }
+    projectService.setCurrentProject(project);
+    $rootScope.$broadcast('setCurrentProject');
+    $rootScope.$broadcast('setTaskList', project);
+    // $rootScope.$broadcast('switchProject', project);
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.controller('AppCtrl', function ($scope, $rootScope, $timeout, projectService) {
+
+  $scope.newProjectTitle = '';
+  $scope.currentProject = {};
+
+  $scope.$on('setCurrentProject', function (event) {
+    $scope.currentProject = projectService.getCurrentProject();
+  });
+
+  $scope.closeRightSidenav = function () {
+    return function () {
+      console.log('closeRightSidenav');
+      var darkenTheScreen = angular.element(document.querySelector('.darken-the-screen'));
+      var myNav = angular.element(document.querySelector('.sidenav-open'));
+      myNav.removeClass('sidenav-open');
+      darkenTheScreen.addClass('fade-out');
+      $timeout(function () {
+        darkenTheScreen.removeClass('fade-out');
+        darkenTheScreen.addClass('hidden');
+      }, 180);
+    };
+  };
+
+  $scope.openRightSidenav = function (navID) {
+    return function () {
+      var darkenTheScreen = $('.darken-the-screen');
+      var myNav = $('#' + navID);
+      darkenTheScreen.removeClass('hidden');
+      myNav.addClass('sidenav-open');
+    };
+  };
+
+  $scope.createProject = function (title) {
+    $rootScope.$broadcast('createProject', title);
+  };
+
+  $scope.deleteProject = function (title) {
+    $rootScope.$broadcast('deleteProject');
+  };
+
+  $scope.editProject = function (newTitle) {
+    $rootScope.$broadcast('editProject', newTitle);
+  };
+
+  $scope.toggleCreateProject = $scope.openRightSidenav('create-project');
+  $scope.toggleDeleteProject = $scope.openRightSidenav('delete-project');
+  $scope.toggleEditProject = $scope.openRightSidenav('edit-project');
+  $scope.toggleCreateTask = $scope.openRightSidenav('create-task');
+  $scope.toggleOpenTask = $scope.openRightSidenav('open-task');
+  $scope.untoggle = $scope.closeRightSidenav();
+});
 'use strict';
 
 var _main = require('./modules/main');
@@ -126,7 +347,12 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var util = require('util');
+
 _main2.default.service('finalTaskListService', function () {
+
+  var finalTaskList = [];
+  var searchResults = [];
 
   var sortByDateAsc = function sortByDateAsc(obj1, obj2) {
 
@@ -153,7 +379,7 @@ _main2.default.service('finalTaskListService', function () {
   var getDayOfWeek = function getDayOfWeek(date) {
     var string = "";
     var now = moment();
-    var myDate = moment(date, "YYYY-DD-MM +-HH:mm:ss");
+    var myDate = moment(date, "YYYY-MM-DD +-HH:mm:ss");
 
     if (myDate.isSame(now, 'day')) {
       string = "Today";
@@ -194,7 +420,6 @@ _main2.default.service('finalTaskListService', function () {
     return string;
   };
 
-  // var finalTaskList = [];
   var formTaskList = function formTaskList(tasks) {
     // sorting based on date
 
@@ -206,6 +431,7 @@ _main2.default.service('finalTaskListService', function () {
       if (days.length < 1) {
         var day = new Object();
         day.date = tasks[key].Task.created_at;
+        console.log('date', day.date);
         day.tasks = [tasks[key].Task];
         days.push(day);
       } else {
@@ -226,19 +452,114 @@ _main2.default.service('finalTaskListService', function () {
         days.push(day);
       }
     }
-    days.sort(sortByDateAsc);
+    // days.sort(sortByDateAsc);
     for (var i = 0; i < days.length; i++) {
       days[i].dayOfWeek = getDayOfWeek(days[i].date);
-      days[i].date = moment(days[i].date, "YYYY-DD-MM +-HH:mm:ss").format("DD.MM.YYYY");
+      days[i].date = moment(days[i].date, "YYYY-MM-DD +-HH:mm:ss").format("DD.MM.YYYY");
+      // days[i].tasks.reverse();
     }
 
-    // finalTaskList = taskList;
-    if (days[0]) console.log("final list", days[0].tasks[0].title);
-    return days;
+    searchResults = angular.copy(days);
+
+    console.log('searchResults', searchResults);
+    finalTaskList = days;
+
+    return true;
+  };
+
+  var getFinalTaskList = function getFinalTaskList() {
+    return finalTaskList;
+  };
+
+  var search = function search(searchText) {
+    searchResults = angular.copy(finalTaskList);
+    if (searchText == '') {
+      return searchResults;
+    }
+    function CustomSearch(searchQuery, element) {
+      // var regexp = new RegExp(searchText, "i");
+      var regexp = new RegExp(searchText, "i");
+      var res = -1;
+      for (var key in element) {
+        if (key != 'image') {
+          // console.log('element[key] ', element[key]);
+          if (util.isString(element[key])) {
+            res = element[key].search(regexp);
+            if (res > -1) {
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
+    }
+
+    for (var i = 0; i < searchResults.length; i++) {
+      console.log('searchResults' + i, searchResults[i]);
+      searchResults[i].tasks = searchResults[i].tasks.filter(CustomSearch.bind(this, searchText));
+      if (!searchResults[i].tasks[0]) {
+        searchResults.splice(i, 1);
+        i--;
+      }
+    }
+    return searchResults;
+  };
+
+  var postCreateAppendTask = function postCreateAppendTask(task) {
+    var now = new Date();
+    var dayOfWeek = getDayOfWeek(now);
+    var date = moment(now, "YYYY-MM-DD +-HH:mm:ss").format("DD.MM.YYYY");
+    for (var i = 0; i < finalTaskList.length; i++) {
+      if (finalTaskList[i].date === date) {
+        finalTaskList[i].tasks.unshift(task);
+        return true;
+      }
+    }
+    var day = new Object();
+    day.date = date;
+    day.tasks = [task];
+    day.dayOfWeek = dayOfWeek;
+    finalTaskList.unshift(day);
+  };
+
+  var appendTask = function appendTask(task) {
+
+    var flag = true;
+    var date = moment(task.created_at, "YYYY-MM-DD +-HH:mm:ss").format("DD.MM.YYYY");
+
+    for (var i = 0; i < finalTaskList.length; i++) {
+      if (finalTaskList[i].date === date) {
+        finalTaskList[i].tasks.push(task);
+        flag = false;
+        break;
+      }
+    }
+    if (flag) {
+      var day = new Object();
+      day.date = date;
+      day.tasks = [task];
+      day.dayOfWeek = getDayOfWeek(task.created_at);
+      finalTaskList.push(day);
+    }
+  };
+
+  var appendNewTasks = function appendNewTasks(tasks) {
+
+    for (var i = 0; i < tasks.length; i++) {
+      appendTask(tasks[i].Task);
+    }
   };
 
   return {
-    formTaskList: formTaskList
+    formTaskList: formTaskList,
+    getFinalTaskList: getFinalTaskList,
+    search: search,
+    postCreateAppendTask: postCreateAppendTask,
+    appendNewTasks: appendNewTasks,
+    getDayOfWeek: getDayOfWeek,
+    formatDate: formatDate
+
   };
 });
 'use strict';
@@ -273,19 +594,31 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+_main2.default.service('loadingTaskService', function () {
+	var show = function show() {
+		$('.loading-circle').removeClass('hidden');
+	};
+
+	var hide = function hide() {
+		$('.loading-circle').addClass('hidden');
+	};
+
+	return {
+		show: show,
+		hide: hide
+	};
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 _main2.default.service('projectService', function ($http) {
 
   var projectList = [];
-
-  // var createProject = function (name)
-  // {
-  //   return{
-  //     name: name,
-  //     tasks: [],
-  //     tasksQuantity: 0,
-  //     tasksIdCount: 0  
-  //   };
-  // }
 
   var createProject = function createProject(session, title) {
     console.log("session:", session, "title:", title);
@@ -300,7 +633,29 @@ _main2.default.service('projectService', function ($http) {
         console.log('check result', response);
         if (response.status == 201) {
           console.log('Project created');
-          resolve("success");
+          resolve(response.data.Project.id);
+        } else {
+          console.log('Project creation failed', response.status);
+          reject('Project creation failed');
+        }
+      });
+    });
+  };
+
+  var fetchProject = function fetchProject(session, id) {
+    console.log("session: ", session, "id: ", id);
+    return new Promise(function (resolve, reject) {
+      var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/projects/project';
+      $http({
+        url: string,
+        method: 'GET',
+        params: { session: session, project_id: id },
+        headers: { 'Content-Type': 'application/json' }
+      }).then(function (response) {
+        console.log('check result', response);
+        if (response.status == 200) {
+          console.log('Project fetched');
+          resolve(response.data.Project);
         } else {
           console.log('Project creation failed', response.status);
           reject('Project creation failed');
@@ -316,7 +671,7 @@ _main2.default.service('projectService', function ($http) {
       $http({
         url: string,
         method: 'POST',
-        data: { session: session, Project: { id: currentProjectId, title: title } },
+        data: { session: session, Project: { id: currentProject.id, title: title } },
         headers: { 'Content-Type': 'application/json' }
       }).then(function (response) {
         console.log('check result', response);
@@ -332,13 +687,13 @@ _main2.default.service('projectService', function ($http) {
   };
 
   var deleteProject = function deleteProject(session) {
-    console.log("Delete project:", currentProjectId);
+    console.log("Delete project:", currentProject.id);
     return new Promise(function (resolve, reject) {
       var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/projects/project';
       $http({
         url: string,
         method: 'DELETE',
-        params: { session: session, project_id: currentProjectId }
+        params: { session: session, project_id: currentProject.id }
       }).then(function (response) {
         console.log('check result', response);
         if (response.status == 200) {
@@ -352,20 +707,23 @@ _main2.default.service('projectService', function ($http) {
     });
   };
 
-  var currentProjectId = "";
+  var currentProject = {};
 
-  var setCurrentProjectId = function setCurrentProjectId(id) {
-    currentProjectId = id;
-    console.log('currentProjectId: ', currentProjectId);
+  var setCurrentProject = function setCurrentProject(project) {
+    currentProject = project;
+    console.log('currentProjectId: ', currentProject);
   };
 
   var getCurrentProjectId = function getCurrentProjectId() {
-    return currentProjectId;
+    return currentProject.id;
   };
 
-  var addProject = function addProject(title) {
+  var getCurrentProject = function getCurrentProject() {
+    return currentProject;
+  };
 
-    projectList.unshift({ newObj: newObj });
+  var appendProject = function appendProject(project) {
+    projectList.unshift(project);
   };
 
   var getProjects = function getProjects() {
@@ -398,12 +756,14 @@ _main2.default.service('projectService', function ($http) {
   return {
     getUserProjects: getUserProjects,
     createProject: createProject,
+    fetchProject: fetchProject,
     editProject: editProject,
     deleteProject: deleteProject,
-    addProject: addProject,
+    appendProject: appendProject,
     getProjects: getProjects,
-    setCurrentProjectId: setCurrentProjectId,
-    getCurrentProjectId: getCurrentProjectId
+    setCurrentProject: setCurrentProject,
+    getCurrentProjectId: getCurrentProjectId,
+    getCurrentProject: getCurrentProject
 
   };
 });
@@ -418,20 +778,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _main2.default.service('taskService', function ($http) {
 
   // delete $http.defaults.headers.common['X-Requested-With'];
+  // var paging_size = 5;
+  // var paging_offset = 0;
+
+  var incrementPagingOffset = function incrementPagingOffset() {
+    paging_offset = paging_offset + 5;
+  };
 
   var addTask = function addTask(currentProject, newObj) {
     currentProject.tasks.push(newObj);
   };
 
-  var fetchTasks = function fetchTasks(session, projectId) {
-    console.log("projectId", projectId);
+  var fetchTasks = function fetchTasks(session, project) {
+
+    console.log("Fetching tasks");
 
     return new Promise(function (resolve, reject) {
       var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/tasks';
       $http({
         url: string,
         method: "GET",
-        params: { session: session, project_id: projectId, paging_size: 20, paging_offset: 10 }
+        params: { session: session, project_id: project.id, paging_size: project.task_count, paging_offset: 0 }
       }).then(function (response) {
         console.log('tasks for project', response.data.tasks);
         if (response.status == 200) {
@@ -445,14 +812,15 @@ _main2.default.service('taskService', function ($http) {
     });
   };
 
-  var fetchTask = function fetchTask(taskId, session) {
+  var fetchTask = function fetchTask(session, taskId) {
 
     return new Promise(function (resolve, reject) {
       var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/tasks/task';
       $http({
         url: string,
         method: "GET",
-        params: { project_id: projectId, paging_size: 20, paging_offset: 10 }
+        params: { session: session, task_id: taskId },
+        headers: { 'Content-Type': 'application/json' }
       }).then(function (response) {
         console.log('Fetched task', response.data.Task);
         if (response.status == 200) {
@@ -466,7 +834,7 @@ _main2.default.service('taskService', function ($http) {
     });
   };
 
-  var createTask = function createTask(session, projectId, title, description) {
+  var createTask = function createTask(session, projectId, task) {
 
     return new Promise(function (resolve, reject) {
       var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/tasks/task';
@@ -474,17 +842,19 @@ _main2.default.service('taskService', function ($http) {
       $http({
         url: string,
         method: 'POST',
-        data: { session: session, Project: { id: projectId }, Task: { title: title, description: description } },
+        data: { session: session, Project: { id: projectId }, Task: { title: task.title, description: task.description } },
         headers: { 'Content-Type': 'application/json' }
       }).then(function (response) {
         console.log('Created task', response.data);
-        if (response.status == 200) {
+        if (response.status == 201) {
           console.log('Task created', response.data);
-          resolve(response.data.Task);
+          resolve(response.data.Task.id);
         } else {
           console.log('Task creation failed');
           reject('Task creation failed');
         }
+      }, function (response) {
+        console.log('Fa', response);
       });
     });
   };
@@ -532,12 +902,35 @@ _main2.default.service('taskService', function ($http) {
     });
   };
 
+  var completeTask = function completeTask(session, taskId) {
+
+    return new Promise(function (resolve, reject) {
+      var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/tasks/task/complite';
+      $http({
+        url: string,
+        method: "POST",
+        data: { session: session, Task: { id: parseInt(taskId) } },
+        headers: { 'Content-Type': 'application/json' }
+      }).then(function (response) {
+        if (response.status == 200) {
+          console.log('Task complete');
+          resolve(response);
+        } else {
+          console.log('Complete failed');
+          reject('Complete failed');
+        }
+      });
+    });
+  };
+
   return {
     fetchTasks: fetchTasks,
     fetchTask: fetchTask,
     createTask: createTask,
     updateTask: updateTask,
-    deleteTask: deleteTask
+    deleteTask: deleteTask,
+    completeTask: completeTask,
+    incrementPagingOffset: incrementPagingOffset
 
   };
 });
@@ -549,84 +942,14 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Project List
-_main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDialog, projectService, authService, loadingScreenService) {
-  // data
-  // $scope.projects = projectService.getProjects();
-  $scope.projects = {
-    projects: [],
-    setProjects: function setProjects(projects) {
-      this.projects = projects;
-    }
-  };
-  $scope.status = '  ';
-  $scope.customFullscreen = false;
-  $scope.newTitle = "";
+_main2.default.directive('createTask', function () {
+  return {
+    restrict: 'E',
+    transclude: 'element',
+    templateUrl: './js/modules/TaskList/create.task.dialog.html',
+    replace: true,
 
-  $scope.$on('getProjects', function (event) {
-    getProjects();
-  });
-
-  $scope.$on('editProject', function (event, newTitle) {
-    loadingScreenService.show();
-    projectService.editProject(authService.getCurrentSession(), newTitle).then(function (result) {
-      getProjects();
-    });
-  });
-
-  $scope.$on('deleteProject', function (event) {
-    loadingScreenService.show();
-    projectService.deleteProject(authService.getCurrentSession()).then(function (result) {
-      getProjects();
-    });
-  });
-
-  function getProjects() {
-
-    projectService.getUserProjects(authService.getCurrentSession()).then(function (result) {
-
-      var projects = projectService.getProjects();
-
-      $scope.$apply(function () {
-
-        $scope.projects.setProjects(projects);
-        loadingScreenService.hide();
-        $scope.setCurrentProjectId(undefined, $scope.projects.projects[0].id);
-      });
-      console.log("new Projects", $scope.projects.projects);
-      // $scope.$apply();
-    });
-  }
-  // Get projects
-  $scope.setCurrentProjectId = function (event, projectId) {
-    console.log("setCurrentProject", projectId);
-    if (event) {
-      if (event.target) {
-        var projectListElements = document.getElementsByClassName("current-project");
-        angular.element(projectListElements).removeClass("current-project");
-        angular.element(event.target).parent().addClass("current-project");
-      }
-    }
-    projectService.setCurrentProjectId(projectId);
-    $rootScope.$broadcast('setTaskList', projectId);
-    // $rootScope.$broadcast('switchProject', project);
-  };
-  // end fake data
-
-  $scope.showAddProjectDialog = function (ev) {
-    // Appending dialog to document.body to cover sidenav in docs app
-    var confirm = $mdDialog.prompt().clickOutsideToClose(true).title('What would you name your brand new project?').textContent('Bowser is a common name.').placeholder('Project name').ariaLabel('Project name').initialValue('Bowser').targetEvent(ev).ok('Okay!').cancel('Cancel');
-
-    $mdDialog.show(confirm).then(function (result) {
-      loadingScreenService.show();
-      projectService.createProject(authService.getCurrentSession(), result).then(function (result) {
-
-        $rootScope.$broadcast('getProjects');
-      });
-    }, function () {
-      console.log("cancel");
-      $scope.status = 'Adding new project canceled.';
-    });
+    controller: function controller($scope) {}
   };
 });
 'use strict';
@@ -637,25 +960,51 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_main2.default.controller('TaskListCtrl', function ($scope, $mdDialog, projectService, taskService, finalTaskListService, authService) {
-  $scope.myTask = {
+// Task List
+_main2.default.directive('openTask', function () {
+  return {
+    restrict: 'E',
+    transclude: 'element',
+    templateUrl: './js/modules/TaskList/open.task.dialog.html',
+    replace: true,
+
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialog, projectService, taskService, finalTaskListService, authService, loadingScreenService, loadingTaskService, $location) {
+  $scope.newTask = {
     title: "",
     description: ""
   };
-
-  // $scope.taskList = {};
-  // var currentProjectId = projectService.getCurrentProjectId();
+  $scope.currentTask = {
+    title: "",
+    description: ""
+  };
+  $scope.searchQuery = "";
   $scope.finalTaskList = [];
 
-  $scope.$on('setTaskList', function (event, projectId) {
-    setTaskList(authService.getCurrentSession(), projectId);
+  $scope.$on('setTaskList', function (event, project) {
+    setTaskList(authService.getCurrentSession(), project);
   });
 
-  function setTaskList(currentSession, projectId) {
-    taskService.fetchTasks(authService.getCurrentSession(), projectId).then(function (result) {
+  function setTaskList(currentSession, project) {
+    loadingScreenService.show();
+    taskService.fetchTasks(authService.getCurrentSession(), project).then(function (result) {
       console.log(result);
-      $scope.finalTaskList = finalTaskListService.formTaskList(result);
+      finalTaskListService.formTaskList(result);
+      $scope.finalTaskList = finalTaskListService.getFinalTaskList();
       console.log($scope.finalTaskList);
+      setTimeout(function () {
+        loadingScreenService.hide();
+      }, 300);
       $scope.$apply();
     });
   };
@@ -666,53 +1015,67 @@ _main2.default.controller('TaskListCtrl', function ($scope, $mdDialog, projectSe
     formListForShow();
   });
 
+  $scope.searchTask = function (searchQuery) {
+    $('.match-not-found-screen').addClass('hidden');
+    console.log('search');
+    $scope.finalTaskList = finalTaskListService.search(searchQuery);
+    if (!$scope.finalTaskList[0]) {
+      $('.match-not-found-screen').removeClass('hidden');
+    }
+  };
+
   function formListForShow() {
     console.log("formListForShow");
     $scope.finalTaskList = finalTaskListService.formTaskList(currentProject);
   }
 
   // push task into current project
-  function addTask(task) {
+  $scope.createTask = function (task) {
+    $scope.$parent.untoggle();
+    loadingScreenService.show();
     taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
-      taskService.fetchTasks(authService.getCurrentSession(), projectService.getCurrentProjectId()).then(function (result) {
-        $scope.finalTaskList = finalTaskListService.formTaskList(result);
+      taskService.fetchTask(authService.getCurrentSession(), result).then(function (res) {
+        finalTaskListService.postCreateAppendTask(res);
+        $scope.finalTaskList = finalTaskListService.getFinalTaskList();
+        console.log('final List', $scope.finalTaskList);
+        $rootScope.$broadcast('taskIncrement');
+        $scope.$apply();
+        loadingScreenService.hide();
       });
-    });
-  }
-
-  $scope.showAddTaskDialog = function (ev) {
-    $mdDialog.show({
-      controller: DialogController,
-      templateUrl: 'js/modules/TaskList/add.task.dialog.html',
-      parent: angular.element(document.body),
-      targetEvent: ev,
-      clickOutsideToClose: true,
-      fullscreen: $scope.customFullscreen
-    }).then(function (date, text) {
-      $scope.status = 'You said the information was "' + '".';
-    }, function () {
-      $scope.status = 'You cancelled the dialog.';
     });
   };
 
-  function DialogController($scope, $mdDialog, taskService, projectService) {
-    $scope.hide = function () {
-      $mdDialog.hide();
+  $scope.openTask = function (title, description) {
+
+    $scope.currentTask = {
+      title: title,
+      description: description
     };
 
-    $scope.cancel = function () {
-      $mdDialog.cancel();
-    };
-    $scope.answer = function (title, description) {
+    $scope.$parent.toggleOpenTask();
+  };
 
-      var task = {
-        title: title,
-        description: description
-      };
-      addTask(task);
-      $mdDialog.hide("answer");
-    };
-  }
+  $scope.completeTask = function (event, taskId) {
+    taskService.completeTask(authService.getCurrentSession(), taskId).then(function (result) {
+      var listLength = $scope.finalTaskList.length;
+      for (var i = 0; i < listLength; i++) {
+        for (var j = 0; j < $scope.finalTaskList[i].tasks.length; j++) {
+          if ($scope.finalTaskList[i].tasks[j].id == taskId) {
+            $scope.finalTaskList[i].tasks.splice(j, 1);
+            if ($scope.finalTaskList[i].tasks.length < 1) {
+              $scope.finalTaskList.splice(i, 1);
+              listLength -= 1;
+              $rootScope.$broadcast('taskDecrement');
+              break;
+            }
+            $rootScope.$broadcast('taskDecrement');
+          }
+        }
+      }
+
+      $scope.$apply();
+    });
+  };
 });
 'use strict';
 
@@ -725,12 +1088,63 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // Task List
 _main2.default.directive('taskList', function () {
   return {
-    restrict: 'EC',
+    restrict: 'E',
+    transclude: 'element',
     templateUrl: './js/modules/TaskList/taskList.html',
-    scope: {},
+    replace: true,
+
     controller: function controller($scope) {}
   };
 });
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.controller('userProfileCtrl', function ($scope, $rootScope, authService) {
+	// Begin getting Session
+	$scope.session = "";
+	$scope.account = {};
+
+	$scope.setAccount = function (account) {
+		$scope.account = account;
+	};
+
+	authService.getSession().then(function (result) {
+		$scope.session = result;
+		console.log("session check");
+		return authService.checkSession(result);
+	}).then(function (result) {
+		console.log("fetch account");
+		return authService.fetchAccount(result);
+	}).then(function (result) {
+		$scope.setAccount(result);
+		// $scope.$apply();
+		// console.log('apply');
+		$rootScope.$broadcast('getProjects', $scope.session);
+		$rootScope.$broadcast('setSession', $scope.session);
+	});
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('userProfile', function () {
+  return {
+    restrict: 'E',
+    templateUrl: './js/modules/User/userProfile.tmpl.html',
+    scope: {},
+    controller: function controller($scope) {}
+
+  };
+}); // User Profile
 'use strict';
 
 var _main = require('./modules/main');
@@ -938,58 +1352,9 @@ _main2.default.directive('toolsMenu', function () {
     }
   };
 });
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.controller('userProfileCtrl', function ($scope, $rootScope, authService) {
-	// Begin getting Session
-	$scope.session = "";
-	$scope.account = {};
-
-	$scope.setAccount = function (account) {
-		$scope.account = account;
-	};
-
-	authService.getSession().then(function (result) {
-		$scope.session = result;
-		console.log("session check");
-		return authService.checkSession(result);
-	}).then(function (result) {
-		console.log("fetch account");
-		return authService.fetchAccount(result);
-	}).then(function (result) {
-		$scope.setAccount(result);
-		// $scope.$apply();
-		// console.log('apply');
-		$rootScope.$broadcast('getProjects', $scope.session);
-		$rootScope.$broadcast('setSession', $scope.session);
-	});
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.directive('userProfile', function () {
-  return {
-    restrict: 'E',
-    templateUrl: './js/modules/User/userProfile.tmpl.html',
-    scope: {},
-    controller: function controller($scope) {}
-
-  };
-}); // User Profile
 
 
-},{"./modules/main":2}],2:[function(require,module,exports){
+},{"./modules/main":2,"util":6}],2:[function(require,module,exports){
 var app = angular.module('ProjectManagerApp', ['ngMaterial', 'ngMessages', 'ngCookies']);
 
 app.config(function ($mdThemingProvider, $httpProvider) {
@@ -1014,8 +1379,8 @@ app.config(function ($mdThemingProvider, $httpProvider) {
 
     $mdThemingProvider.theme('default')
       .primaryPalette('customPrimary')
-      .accentPalette('green');
-
+      .accentPalette('red');
+  // delete $httpProvider.defaults.headers.post['Content-type']
   // $httpProvider.defaults.useXDomain = true;
   // $httpProvider.defaults.withCredentials = true;
   // delete $httpProvider.defaults.headers.common["X-Requested-With"];
@@ -1025,4 +1390,808 @@ app.config(function ($mdThemingProvider, $httpProvider) {
   });
 
 module.exports = app;
-},{}]},{},[1]);
+},{}],3:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],4:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],5:[function(require,module,exports){
+module.exports = function isBuffer(arg) {
+  return arg && typeof arg === 'object'
+    && typeof arg.copy === 'function'
+    && typeof arg.fill === 'function'
+    && typeof arg.readUInt8 === 'function';
+}
+},{}],6:[function(require,module,exports){
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+var formatRegExp = /%[sdj%]/g;
+exports.format = function(f) {
+  if (!isString(f)) {
+    var objects = [];
+    for (var i = 0; i < arguments.length; i++) {
+      objects.push(inspect(arguments[i]));
+    }
+    return objects.join(' ');
+  }
+
+  var i = 1;
+  var args = arguments;
+  var len = args.length;
+  var str = String(f).replace(formatRegExp, function(x) {
+    if (x === '%%') return '%';
+    if (i >= len) return x;
+    switch (x) {
+      case '%s': return String(args[i++]);
+      case '%d': return Number(args[i++]);
+      case '%j':
+        try {
+          return JSON.stringify(args[i++]);
+        } catch (_) {
+          return '[Circular]';
+        }
+      default:
+        return x;
+    }
+  });
+  for (var x = args[i]; i < len; x = args[++i]) {
+    if (isNull(x) || !isObject(x)) {
+      str += ' ' + x;
+    } else {
+      str += ' ' + inspect(x);
+    }
+  }
+  return str;
+};
+
+
+// Mark that a method should not be used.
+// Returns a modified function which warns once by default.
+// If --no-deprecation is set, then it is a no-op.
+exports.deprecate = function(fn, msg) {
+  // Allow for deprecating things in the process of starting up.
+  if (isUndefined(global.process)) {
+    return function() {
+      return exports.deprecate(fn, msg).apply(this, arguments);
+    };
+  }
+
+  if (process.noDeprecation === true) {
+    return fn;
+  }
+
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (process.throwDeprecation) {
+        throw new Error(msg);
+      } else if (process.traceDeprecation) {
+        console.trace(msg);
+      } else {
+        console.error(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
+
+  return deprecated;
+};
+
+
+var debugs = {};
+var debugEnviron;
+exports.debuglog = function(set) {
+  if (isUndefined(debugEnviron))
+    debugEnviron = process.env.NODE_DEBUG || '';
+  set = set.toUpperCase();
+  if (!debugs[set]) {
+    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+      var pid = process.pid;
+      debugs[set] = function() {
+        var msg = exports.format.apply(exports, arguments);
+        console.error('%s %d: %s', set, pid, msg);
+      };
+    } else {
+      debugs[set] = function() {};
+    }
+  }
+  return debugs[set];
+};
+
+
+/**
+ * Echos the value of a value. Trys to print the value out
+ * in the best way possible given the different types.
+ *
+ * @param {Object} obj The object to print out.
+ * @param {Object} opts Optional options object that alters the output.
+ */
+/* legacy: obj, showHidden, depth, colors*/
+function inspect(obj, opts) {
+  // default options
+  var ctx = {
+    seen: [],
+    stylize: stylizeNoColor
+  };
+  // legacy...
+  if (arguments.length >= 3) ctx.depth = arguments[2];
+  if (arguments.length >= 4) ctx.colors = arguments[3];
+  if (isBoolean(opts)) {
+    // legacy...
+    ctx.showHidden = opts;
+  } else if (opts) {
+    // got an "options" object
+    exports._extend(ctx, opts);
+  }
+  // set default options
+  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+  if (isUndefined(ctx.depth)) ctx.depth = 2;
+  if (isUndefined(ctx.colors)) ctx.colors = false;
+  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+  if (ctx.colors) ctx.stylize = stylizeWithColor;
+  return formatValue(ctx, obj, ctx.depth);
+}
+exports.inspect = inspect;
+
+
+// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+inspect.colors = {
+  'bold' : [1, 22],
+  'italic' : [3, 23],
+  'underline' : [4, 24],
+  'inverse' : [7, 27],
+  'white' : [37, 39],
+  'grey' : [90, 39],
+  'black' : [30, 39],
+  'blue' : [34, 39],
+  'cyan' : [36, 39],
+  'green' : [32, 39],
+  'magenta' : [35, 39],
+  'red' : [31, 39],
+  'yellow' : [33, 39]
+};
+
+// Don't use 'blue' not visible on cmd.exe
+inspect.styles = {
+  'special': 'cyan',
+  'number': 'yellow',
+  'boolean': 'yellow',
+  'undefined': 'grey',
+  'null': 'bold',
+  'string': 'green',
+  'date': 'magenta',
+  // "name": intentionally not styling
+  'regexp': 'red'
+};
+
+
+function stylizeWithColor(str, styleType) {
+  var style = inspect.styles[styleType];
+
+  if (style) {
+    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+           '\u001b[' + inspect.colors[style][1] + 'm';
+  } else {
+    return str;
+  }
+}
+
+
+function stylizeNoColor(str, styleType) {
+  return str;
+}
+
+
+function arrayToHash(array) {
+  var hash = {};
+
+  array.forEach(function(val, idx) {
+    hash[val] = true;
+  });
+
+  return hash;
+}
+
+
+function formatValue(ctx, value, recurseTimes) {
+  // Provide a hook for user-specified inspect functions.
+  // Check that value is an object with an inspect function on it
+  if (ctx.customInspect &&
+      value &&
+      isFunction(value.inspect) &&
+      // Filter out the util module, it's inspect function is special
+      value.inspect !== exports.inspect &&
+      // Also filter out any prototype objects using the circular check.
+      !(value.constructor && value.constructor.prototype === value)) {
+    var ret = value.inspect(recurseTimes, ctx);
+    if (!isString(ret)) {
+      ret = formatValue(ctx, ret, recurseTimes);
+    }
+    return ret;
+  }
+
+  // Primitive types cannot have properties
+  var primitive = formatPrimitive(ctx, value);
+  if (primitive) {
+    return primitive;
+  }
+
+  // Look up the keys of the object.
+  var keys = Object.keys(value);
+  var visibleKeys = arrayToHash(keys);
+
+  if (ctx.showHidden) {
+    keys = Object.getOwnPropertyNames(value);
+  }
+
+  // IE doesn't make error fields non-enumerable
+  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+  if (isError(value)
+      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+    return formatError(value);
+  }
+
+  // Some type of object without properties can be shortcutted.
+  if (keys.length === 0) {
+    if (isFunction(value)) {
+      var name = value.name ? ': ' + value.name : '';
+      return ctx.stylize('[Function' + name + ']', 'special');
+    }
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    }
+    if (isDate(value)) {
+      return ctx.stylize(Date.prototype.toString.call(value), 'date');
+    }
+    if (isError(value)) {
+      return formatError(value);
+    }
+  }
+
+  var base = '', array = false, braces = ['{', '}'];
+
+  // Make Array say that they are Array
+  if (isArray(value)) {
+    array = true;
+    braces = ['[', ']'];
+  }
+
+  // Make functions say that they are functions
+  if (isFunction(value)) {
+    var n = value.name ? ': ' + value.name : '';
+    base = ' [Function' + n + ']';
+  }
+
+  // Make RegExps say that they are RegExps
+  if (isRegExp(value)) {
+    base = ' ' + RegExp.prototype.toString.call(value);
+  }
+
+  // Make dates with properties first say the date
+  if (isDate(value)) {
+    base = ' ' + Date.prototype.toUTCString.call(value);
+  }
+
+  // Make error with message first say the error
+  if (isError(value)) {
+    base = ' ' + formatError(value);
+  }
+
+  if (keys.length === 0 && (!array || value.length == 0)) {
+    return braces[0] + base + braces[1];
+  }
+
+  if (recurseTimes < 0) {
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    } else {
+      return ctx.stylize('[Object]', 'special');
+    }
+  }
+
+  ctx.seen.push(value);
+
+  var output;
+  if (array) {
+    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+  } else {
+    output = keys.map(function(key) {
+      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+    });
+  }
+
+  ctx.seen.pop();
+
+  return reduceToSingleString(output, base, braces);
+}
+
+
+function formatPrimitive(ctx, value) {
+  if (isUndefined(value))
+    return ctx.stylize('undefined', 'undefined');
+  if (isString(value)) {
+    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                             .replace(/'/g, "\\'")
+                                             .replace(/\\"/g, '"') + '\'';
+    return ctx.stylize(simple, 'string');
+  }
+  if (isNumber(value))
+    return ctx.stylize('' + value, 'number');
+  if (isBoolean(value))
+    return ctx.stylize('' + value, 'boolean');
+  // For some reason typeof null is "object", so special case here.
+  if (isNull(value))
+    return ctx.stylize('null', 'null');
+}
+
+
+function formatError(value) {
+  return '[' + Error.prototype.toString.call(value) + ']';
+}
+
+
+function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+  var output = [];
+  for (var i = 0, l = value.length; i < l; ++i) {
+    if (hasOwnProperty(value, String(i))) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          String(i), true));
+    } else {
+      output.push('');
+    }
+  }
+  keys.forEach(function(key) {
+    if (!key.match(/^\d+$/)) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          key, true));
+    }
+  });
+  return output;
+}
+
+
+function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+  var name, str, desc;
+  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+  if (desc.get) {
+    if (desc.set) {
+      str = ctx.stylize('[Getter/Setter]', 'special');
+    } else {
+      str = ctx.stylize('[Getter]', 'special');
+    }
+  } else {
+    if (desc.set) {
+      str = ctx.stylize('[Setter]', 'special');
+    }
+  }
+  if (!hasOwnProperty(visibleKeys, key)) {
+    name = '[' + key + ']';
+  }
+  if (!str) {
+    if (ctx.seen.indexOf(desc.value) < 0) {
+      if (isNull(recurseTimes)) {
+        str = formatValue(ctx, desc.value, null);
+      } else {
+        str = formatValue(ctx, desc.value, recurseTimes - 1);
+      }
+      if (str.indexOf('\n') > -1) {
+        if (array) {
+          str = str.split('\n').map(function(line) {
+            return '  ' + line;
+          }).join('\n').substr(2);
+        } else {
+          str = '\n' + str.split('\n').map(function(line) {
+            return '   ' + line;
+          }).join('\n');
+        }
+      }
+    } else {
+      str = ctx.stylize('[Circular]', 'special');
+    }
+  }
+  if (isUndefined(name)) {
+    if (array && key.match(/^\d+$/)) {
+      return str;
+    }
+    name = JSON.stringify('' + key);
+    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+      name = name.substr(1, name.length - 2);
+      name = ctx.stylize(name, 'name');
+    } else {
+      name = name.replace(/'/g, "\\'")
+                 .replace(/\\"/g, '"')
+                 .replace(/(^"|"$)/g, "'");
+      name = ctx.stylize(name, 'string');
+    }
+  }
+
+  return name + ': ' + str;
+}
+
+
+function reduceToSingleString(output, base, braces) {
+  var numLinesEst = 0;
+  var length = output.reduce(function(prev, cur) {
+    numLinesEst++;
+    if (cur.indexOf('\n') >= 0) numLinesEst++;
+    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+  }, 0);
+
+  if (length > 60) {
+    return braces[0] +
+           (base === '' ? '' : base + '\n ') +
+           ' ' +
+           output.join(',\n  ') +
+           ' ' +
+           braces[1];
+  }
+
+  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+}
+
+
+// NOTE: These type checking functions intentionally don't use `instanceof`
+// because it is fragile and can be easily faked with `Object.create()`.
+function isArray(ar) {
+  return Array.isArray(ar);
+}
+exports.isArray = isArray;
+
+function isBoolean(arg) {
+  return typeof arg === 'boolean';
+}
+exports.isBoolean = isBoolean;
+
+function isNull(arg) {
+  return arg === null;
+}
+exports.isNull = isNull;
+
+function isNullOrUndefined(arg) {
+  return arg == null;
+}
+exports.isNullOrUndefined = isNullOrUndefined;
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+exports.isNumber = isNumber;
+
+function isString(arg) {
+  return typeof arg === 'string';
+}
+exports.isString = isString;
+
+function isSymbol(arg) {
+  return typeof arg === 'symbol';
+}
+exports.isSymbol = isSymbol;
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+exports.isUndefined = isUndefined;
+
+function isRegExp(re) {
+  return isObject(re) && objectToString(re) === '[object RegExp]';
+}
+exports.isRegExp = isRegExp;
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+exports.isObject = isObject;
+
+function isDate(d) {
+  return isObject(d) && objectToString(d) === '[object Date]';
+}
+exports.isDate = isDate;
+
+function isError(e) {
+  return isObject(e) &&
+      (objectToString(e) === '[object Error]' || e instanceof Error);
+}
+exports.isError = isError;
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+exports.isFunction = isFunction;
+
+function isPrimitive(arg) {
+  return arg === null ||
+         typeof arg === 'boolean' ||
+         typeof arg === 'number' ||
+         typeof arg === 'string' ||
+         typeof arg === 'symbol' ||  // ES6 symbol
+         typeof arg === 'undefined';
+}
+exports.isPrimitive = isPrimitive;
+
+exports.isBuffer = require('./support/isBuffer');
+
+function objectToString(o) {
+  return Object.prototype.toString.call(o);
+}
+
+
+function pad(n) {
+  return n < 10 ? '0' + n.toString(10) : n.toString(10);
+}
+
+
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+              'Oct', 'Nov', 'Dec'];
+
+// 26 Feb 16:19:34
+function timestamp() {
+  var d = new Date();
+  var time = [pad(d.getHours()),
+              pad(d.getMinutes()),
+              pad(d.getSeconds())].join(':');
+  return [d.getDate(), months[d.getMonth()], time].join(' ');
+}
+
+
+// log is just a thin wrapper to console.log that prepends a timestamp
+exports.log = function() {
+  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+};
+
+
+/**
+ * Inherit the prototype methods from one constructor into another.
+ *
+ * The Function.prototype.inherits from lang.js rewritten as a standalone
+ * function (not on Function.prototype). NOTE: If this file is to be loaded
+ * during bootstrapping this function needs to be rewritten using some native
+ * functions as prototype setup using normal JavaScript does not work as
+ * expected during bootstrapping (see mirror.js in r114903).
+ *
+ * @param {function} ctor Constructor function which needs to inherit the
+ *     prototype.
+ * @param {function} superCtor Constructor function to inherit prototype from.
+ */
+exports.inherits = require('inherits');
+
+exports._extend = function(origin, add) {
+  // Don't do anything if add isn't an object
+  if (!add || !isObject(add)) return origin;
+
+  var keys = Object.keys(add);
+  var i = keys.length;
+  while (i--) {
+    origin[keys[i]] = add[keys[i]];
+  }
+  return origin;
+};
+
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":5,"_process":3,"inherits":4}]},{},[1]);
