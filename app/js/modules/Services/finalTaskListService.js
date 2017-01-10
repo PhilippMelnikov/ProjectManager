@@ -1,7 +1,10 @@
 import app from './modules/main'
+const util = require('util')
 
 app.service('finalTaskListService', function() {
 
+  var finalTaskList = [];
+  var searchResults = [];
 
   var sortByDateAsc = function (obj1, obj2) {
 
@@ -30,7 +33,7 @@ app.service('finalTaskListService', function() {
   var getDayOfWeek = function (date) {
     var string = "";
     var now = moment();
-    var myDate = moment(date,"YYYY-DD-MM +-HH:mm:ss");
+    var myDate = moment(date,"YYYY-MM-DD +-HH:mm:ss");
 
     if (myDate.isSame(now,'day'))
     {
@@ -75,7 +78,6 @@ app.service('finalTaskListService', function() {
 
   };
 
-  // var finalTaskList = [];
   var formTaskList = function (tasks) { // sorting based on date
     
     var days = [];
@@ -88,6 +90,7 @@ app.service('finalTaskListService', function() {
       {
         var day = new Object();
         day.date = tasks[key].Task.created_at;
+        console.log('date',day.date);
         day.tasks = [tasks[key].Task];
         days.push(day);
       }
@@ -114,21 +117,133 @@ app.service('finalTaskListService', function() {
 
       }
     }
-    days.sort(sortByDateAsc);
+    // days.sort(sortByDateAsc);
     for (var i = 0; i < days.length; i++)
     {
       days[i].dayOfWeek = getDayOfWeek(days[i].date);
-      days[i].date = moment(days[i].date,"YYYY-DD-MM +-HH:mm:ss").format("DD.MM.YYYY");
+      days[i].date = moment(days[i].date,"YYYY-MM-DD +-HH:mm:ss").format("DD.MM.YYYY");
+      // days[i].tasks.reverse();
     }
 
-      // finalTaskList = taskList;
-      if(days[0])
-      console.log("final list", days[0].tasks[0].title);
-      return days;
+      searchResults = angular.copy(days);
+      
+      console.log('searchResults', searchResults);
+      finalTaskList = days;
+
+      return true;
 
     };
 
+    var getFinalTaskList = function () {
+      return finalTaskList;
+    };
+
+    var search = function (searchText) {
+      searchResults = angular.copy(finalTaskList);
+      if(searchText=='')
+      {
+       return searchResults;
+      }
+       function CustomSearch(searchQuery, element) 
+       {
+           // var regexp = new RegExp(searchText, "i");
+           var regexp = new RegExp(searchText, "i");
+           var res = -1;
+           for(var key in element)
+           {
+            if(key!='image')
+              {
+                // console.log('element[key] ', element[key]);
+                if(util.isString(element[key]))
+               { 
+                res = element[key].search(regexp);
+                if(res>-1)
+                {
+                  return true;
+                }
+              }
+              }
+           }
+           
+           return false;
+         }
+
+      for(let i = 0; i < searchResults.length; i++)
+      {
+        console.log('searchResults' + i, searchResults[i]);
+        searchResults[i].tasks = searchResults[i].tasks.filter(CustomSearch.bind(this,searchText));
+        if(!searchResults[i].tasks[0])
+        {
+          searchResults.splice(i, 1);
+          i--;
+        }
+      }
+      return searchResults;
+    };
+
+    var postCreateAppendTask = function (task) {
+      let now = new Date();
+      let dayOfWeek = getDayOfWeek(now);
+      let date = moment(now, "YYYY-MM-DD +-HH:mm:ss").format("DD.MM.YYYY");
+      for (let i = 0; i< finalTaskList.length; i++)
+      {
+        if(finalTaskList[i].date===date)
+          {
+            finalTaskList[i].tasks.unshift(task);
+            return true;
+          }
+      }
+      let day = new Object();
+      day.date = date;
+      day.tasks = [task];
+      day.dayOfWeek = dayOfWeek;
+      finalTaskList.unshift(day);
+    };
+
+
+    var appendTask = function (task) {
+
+        let flag = true;
+        let date = moment(task.created_at, "YYYY-MM-DD +-HH:mm:ss").format("DD.MM.YYYY");
+        
+        for (let i = 0; i< finalTaskList.length; i++)
+        {
+          if(finalTaskList[i].date===date)
+            {
+              finalTaskList[i].tasks.push(task);
+              flag = false;
+              break;
+            }
+        }
+        if (flag)
+        {
+          let day = new Object();
+          day.date = date;
+          day.tasks = [task];
+          day.dayOfWeek = getDayOfWeek(task.created_at);
+          finalTaskList.push(day);
+        }
+      };
+
+    var appendNewTasks = function (tasks)
+    {
+
+      for (let i = 0; i < tasks.length; i++)
+      {
+        appendTask(tasks[i].Task);
+      }
+
+    };
+
+
     return {
-      formTaskList: formTaskList
+      formTaskList: formTaskList,
+      getFinalTaskList: getFinalTaskList,
+      search: search,
+      postCreateAppendTask: postCreateAppendTask,
+      appendNewTasks: appendNewTasks,
+      getDayOfWeek: getDayOfWeek,
+      formatDate: formatDate
+
     };
   } )

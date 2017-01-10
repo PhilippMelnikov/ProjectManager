@@ -1,4 +1,4 @@
- <md-dialog aria-label="Edit Project Dialog">
+<!--  <md-dialog aria-label="Edit Project Dialog">
   <form ng-cloak>
     <md-dialog-content>
       <div class="md-dialog-content add-task-form">
@@ -16,10 +16,34 @@
       <md-button ng-click="cancel()">
         Cancel
       </md-button>
-      <!-- <span flex></span> -->
+
       <md-button ng-click="answer(newProjectTitle)">
         Edit
       </md-button>
     </md-dialog-actions>
   </form>
-</md-dialog>
+</md-dialog> -->
+
+<div ng-controller="AppCtrl" class="right-sidenav" id='edit-project'>
+
+      <md-toolbar class="right-sidenav-top">
+        <div class="esc" ng-click="untoggle()">
+          <div class="esc-icon">
+            <i class="icons8-delete-2"></i>
+          </div>
+          <div class="esc-word">esc</div>
+        </div>
+        <h1>Type a new title for your project</h1>
+      </md-toolbar>
+      <md-content layout-padding="" >
+        <form>
+          <md-input-container md-no-float class="md-block">
+          <input ng-model="newProjectTitle" id="project-name-input" placeholder="New project name">
+        </md-input-container>
+        </form>
+        <md-button ng-click="editProject(newProjectTitle)" class="md-fab confirm-button md-primary" aria-label="confirm">
+              <i class="icons8-checkmark"></i>
+        </md-button>
+      </md-content>
+
+  </div>

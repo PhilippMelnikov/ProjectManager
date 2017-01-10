@@ -1,0 +1,23 @@
+<div class="right-sidenav" id='open-task'>
+
+      <md-toolbar class="right-sidenav-top">
+        <div class="esc" ng-click="untoggle()">
+          <div class="esc-icon">
+            <i class="icons8-delete-2"></i>
+          </div>
+          <div class="esc-word">esc</div>
+        </div>
+        <h1>{{currentTask.title}}</h1>
+        <div class="instruments">
+          <i class="icons8-edit"></i>
+          <i class="icons8-delete"></i>
+        </div>
+      </md-toolbar>
+      <md-content layout-padding="" >
+        <p>
+          {{currentTask.description}}
+        </p>
+       
+      </md-content>
+
+  </div>

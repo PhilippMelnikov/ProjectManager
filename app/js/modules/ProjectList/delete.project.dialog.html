@@ -1,4 +1,4 @@
- <md-dialog aria-label="Delete Project Dialog">
+ <!-- <md-dialog aria-label="Delete Project Dialog">
   <form ng-cloak>
     <md-dialog-content>
       <div class="md-dialog-content add-task-form">
@@ -10,10 +10,33 @@
       <md-button ng-click="cancel()">
         Cancel
       </md-button>
-      <!-- <span flex></span> -->
       <md-button ng-click="confirmDelete()">
         Delete
       </md-button>
     </md-dialog-actions>
   </form>
-</md-dialog>
+</md-dialog> -->
+
+<div ng-controller="AppCtrl" class="right-sidenav" id='delete-project'>
+
+      <md-toolbar class="right-sidenav-top">
+        <div class="esc" ng-click="untoggle()">
+          <div class="esc-icon">
+            <i class="icons8-delete-2"></i>
+          </div>
+          <div class="esc-word">esc</div>
+        </div>
+        <h1>Delete project</h1>
+      </md-toolbar>
+      <md-content layout-padding="" >
+        <p class="delete-warning">
+          {{currentProject.title}} project will be completely removed from the system. 
+        <br>
+          Are you sure, you really want to do that?
+        </p>
+        <md-button ng-click="deleteProject()" class="md-fab confirm-button md-primary" aria-label="confirm">
+              <i class="icons8-checkmark"></i>
+        </md-button>
+      </md-content>
+
+  </div>

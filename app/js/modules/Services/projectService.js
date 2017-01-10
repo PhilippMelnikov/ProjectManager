@@ -4,16 +4,6 @@ app.service('projectService', function($http) {
 
   var projectList = [];
 
-  // var createProject = function (name)
-  // {
-  //   return{
-  //     name: name,
-  //     tasks: [],
-  //     tasksQuantity: 0,
-  //     tasksIdCount: 0  
-  //   };
-  // }
-
   var createProject = function (session, title)
   {
     console.log("session:", session, "title:", title);
@@ -30,7 +20,7 @@ app.service('projectService', function($http) {
         if (response.status == 201) 
         {
           console.log('Project created');
-          resolve("success");
+          resolve(response.data.Project.id);
         }
         else 
         {
@@ -41,6 +31,34 @@ app.service('projectService', function($http) {
     });
   }
 
+  var fetchProject = function (session, id)
+  {
+    console.log("session: ", session, "id: ", id);
+    return new Promise(function(resolve, reject){
+      var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/projects/project';
+      $http({
+        url: string,
+        method: 'GET',
+        params: {session: session, project_id: id},
+        headers: {'Content-Type': 'application/json'}
+      })        
+      .then(function(response){
+        console.log('check result', response)
+        if (response.status == 200) 
+        {
+          console.log('Project fetched');
+          resolve(response.data.Project);
+        }
+        else 
+        {
+          console.log('Project creation failed', response.status);
+          reject('Project creation failed');
+        }
+      });
+    });
+  }
+
+
   var editProject = function (session, title)
   {
     console.log("session:", session, "title:", title);
@@ -49,7 +67,7 @@ app.service('projectService', function($http) {
       $http({
         url: string,
         method: 'POST',
-        data: {session: session, Project: {id: currentProjectId, title: title}},
+        data: {session: session, Project: {id: currentProject.id, title: title}},
         headers: {'Content-Type': 'application/json'}
       })        
       .then(function(response){
@@ -70,13 +88,13 @@ app.service('projectService', function($http) {
 
    var deleteProject = function (session)
   {
-    console.log("Delete project:", currentProjectId);
+    console.log("Delete project:", currentProject.id);
     return new Promise(function(resolve, reject){
       var string = 'https://private-anon-ba926edde6-testfrontend1.apiary-proxy.com/projects/project';
       $http({
         url: string,
         method: 'DELETE',
-        params: {session: session, project_id: currentProjectId}
+        params: {session: session, project_id: currentProject.id}
       })        
       .then(function(response){
         console.log('check result', response)
@@ -94,23 +112,27 @@ app.service('projectService', function($http) {
     });
   }
 
-  var currentProjectId = "";
+  var currentProject = {};
 
 
-  var setCurrentProjectId = function (id)
+  var setCurrentProject = function (project)
   {
-    currentProjectId = id;
-    console.log('currentProjectId: ', currentProjectId);
+    currentProject = project;
+    console.log('currentProjectId: ', currentProject);
   }
 
   var getCurrentProjectId = function ()
   {
-    return currentProjectId;
+    return currentProject.id;
   }
 
-  var addProject = function(title) {
+  var getCurrentProject = function ()
+  {
+    return currentProject;
+  }
 
-      projectList.unshift({newObj});
+  var appendProject = function(project) {
+    projectList.unshift(project);
   };
 
   var getProjects = function(){
@@ -148,12 +170,14 @@ app.service('projectService', function($http) {
   return {
     getUserProjects: getUserProjects,
     createProject: createProject,
+    fetchProject: fetchProject,
     editProject: editProject,
     deleteProject: deleteProject,
-    addProject: addProject,
+    appendProject: appendProject,
     getProjects: getProjects,
-    setCurrentProjectId: setCurrentProjectId,
-    getCurrentProjectId: getCurrentProjectId
+    setCurrentProject: setCurrentProject,
+    getCurrentProjectId: getCurrentProjectId,
+    getCurrentProject: getCurrentProject
 
 
   };

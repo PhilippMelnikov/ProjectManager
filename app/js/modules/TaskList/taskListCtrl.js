@@ -1,25 +1,33 @@
 import app from './modules/main'
 
-app.controller('TaskListCtrl', function($scope, $mdDialog, projectService, taskService, finalTaskListService, authService) {
-  $scope.myTask = {
+app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectService, taskService, finalTaskListService, authService, loadingScreenService, loadingTaskService, $location) {
+  $scope.newTask = {
     title: "",
     description: ""
-  }; 
-  
-  // $scope.taskList = {};
-  // var currentProjectId = projectService.getCurrentProjectId();
+  };
+  $scope.currentTask = {
+    title: "",
+    description: ""
+  };  
+  $scope.searchQuery = "";
   $scope.finalTaskList = [];
 
 
-  $scope.$on('setTaskList', function (event, projectId) {
-     setTaskList(authService.getCurrentSession(), projectId);
+  $scope.$on('setTaskList', function (event, project) {
+     setTaskList(authService.getCurrentSession(), project);
   })
 
-   function setTaskList (currentSession, projectId) {
-    taskService.fetchTasks(authService.getCurrentSession(), projectId).then(function(result){
-       console.log(result);
-    $scope.finalTaskList = finalTaskListService.formTaskList(result);
+   function setTaskList (currentSession, project) {
+    loadingScreenService.show();
+    taskService.fetchTasks(authService.getCurrentSession(), project)
+    .then(function(result){
+    console.log(result);
+    finalTaskListService.formTaskList(result);
+    $scope.finalTaskList = finalTaskListService.getFinalTaskList();
     console.log($scope.finalTaskList);
+    setTimeout(function(){
+      loadingScreenService.hide();
+    }, 300)
     $scope.$apply();
     });
 
@@ -32,6 +40,16 @@ app.controller('TaskListCtrl', function($scope, $mdDialog, projectService, taskS
     formListForShow();
   });
 
+  $scope.searchTask = function (searchQuery)
+  {
+    $('.match-not-found-screen').addClass('hidden');
+    console.log('search');
+    $scope.finalTaskList = finalTaskListService.search(searchQuery);
+    if(!$scope.finalTaskList[0])
+    {
+      $('.match-not-found-screen').removeClass('hidden');
+    }
+  }
 
     function formListForShow ()
     {
@@ -40,52 +58,63 @@ app.controller('TaskListCtrl', function($scope, $mdDialog, projectService, taskS
     }
 
     // push task into current project
-    function addTask (task)
+    $scope.createTask = function (task)
     {
+      $scope.$parent.untoggle();
+      loadingScreenService.show();
       taskService.createTask(authService.getCurrentSession(),projectService.getCurrentProjectId(), task)
       .then(function(result){
-        taskService.fetchTasks(authService.getCurrentSession(), projectService.getCurrentProjectId()).then(function(result){
-        $scope.finalTaskList = finalTaskListService.formTaskList(result);
-          });
+        taskService.fetchTask(authService.getCurrentSession(), result)
+        .then(function(res){
+            finalTaskListService.postCreateAppendTask(res);
+            $scope.finalTaskList = finalTaskListService.getFinalTaskList();
+            console.log('final List', $scope.finalTaskList);
+            $rootScope.$broadcast('taskIncrement');
+            $scope.$apply();
+            loadingScreenService.hide();
+        });
+        
       });
        
     }
 
-    $scope.showAddTaskDialog = function(ev) {
-    $mdDialog.show({
-      controller: DialogController,
-      templateUrl: 'js/modules/TaskList/add.task.dialog.html',
-      parent: angular.element(document.body),
-      targetEvent: ev,
-      clickOutsideToClose:true,
-      fullscreen: $scope.customFullscreen 
-    })
-    .then(function(date, text) {
-      $scope.status = 'You said the information was "' + '".';
-
-    }, function() {
-      $scope.status = 'You cancelled the dialog.';
-    });
-  };  
-
-    function DialogController($scope, $mdDialog, taskService, projectService) {
-    $scope.hide = function() {
-      $mdDialog.hide();
-    };
-
-    $scope.cancel = function() {
-      $mdDialog.cancel();
-    };
-    $scope.answer = function(title, description) {
-
-       var task = {
+     $scope.openTask = function (title, description)
+    { 
+      
+      $scope.currentTask = {
         title: title,
         description: description
       };
-      addTask(task);
-      $mdDialog.hide("answer");
+      
+      $scope.$parent.toggleOpenTask();
+    }
 
-    };
-  }
+    $scope.completeTask = function (event, taskId)
+    {
+      taskService.completeTask(authService.getCurrentSession(), taskId).then(function (result){
+        let listLength = $scope.finalTaskList.length;
+        for(let i = 0; i < listLength; i++)
+        {
+            for(let j = 0; j < $scope.finalTaskList[i].tasks.length; j++)
+            {
+              if($scope.finalTaskList[i].tasks[j].id == taskId)
+              {
+               $scope.finalTaskList[i].tasks.splice(j, 1);
+               if($scope.finalTaskList[i].tasks.length<1)
+               {
+                  $scope.finalTaskList.splice(i, 1);
+                  listLength-=1;
+                  $rootScope.$broadcast('taskDecrement');
+                  break;
+               }
+               $rootScope.$broadcast('taskDecrement');
+              }
+            }
+        }
+      
+        $scope.$apply();
+      });
+
+    }
 
 } );

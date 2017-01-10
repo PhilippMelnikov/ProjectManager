@@ -10,6 +10,7 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
       this.projects = projects;
     }
   };
+  $scope.firstTime = true;
   $scope.status = '  ';
   $scope.customFullscreen = false;
   $scope.newTitle = "";
@@ -18,7 +19,30 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
     getProjects();
   });
 
+  $scope.$on('createProject', function (event, title) {
+      $scope.$parent.untoggle();
+      loadingScreenService.show();
+      projectService.createProject(authService.getCurrentSession(), title)
+      .then(function(result){
+        projectService.fetchProject(authService.getCurrentSession(), result).then(function(res){
+          projectService.appendProject(res);
+          $scope.setCurrentProject(undefined, res);
+          $scope.$apply();
+        });
+
+      });
+  });
+
+  $scope.$on('taskIncrement', function (event) {
+    $scope.taskIncrement();
+  });
+
+  $scope.$on('taskDecrement', function (event) {
+    $scope.taskDecrement();
+  });
+
    $scope.$on('editProject', function (event, newTitle) {
+    $scope.$parent.untoggle();
     loadingScreenService.show();
     projectService.editProject(authService.getCurrentSession(), newTitle)
     .then(function (result) {
@@ -27,6 +51,7 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
    });
 
    $scope.$on('deleteProject', function (event) {
+    $scope.$parent.untoggle();
     loadingScreenService.show();
     projectService.deleteProject(authService.getCurrentSession())
     .then(function (result) {
@@ -46,16 +71,38 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
 
       $scope.projects.setProjects(projects);
       loadingScreenService.hide();
-      $scope.setCurrentProjectId(undefined, $scope.projects.projects[0].id);
+      if($scope.firstTime)
+      {
+        $scope.firstTime = false;
+        $scope.setCurrentProject(undefined, $scope.projects.projects[0]);
+      }
     });
       console.log("new Projects",$scope.projects.projects);
-      // $scope.$apply();
     });
 
   }
+
+  $scope.taskIncrement = function () {
+    $scope.projects.projects.forEach(function(elem, index, arr){
+      if(elem.id === projectService.getCurrentProjectId())
+        {
+          elem.task_count=parseInt(elem.task_count,10) + 1;
+        }
+    });
+  }
+
+  $scope.taskDecrement = function () {
+    $scope.projects.projects.forEach(function(elem, index, arr){
+      if(elem.id === projectService.getCurrentProjectId())
+        {
+          elem.task_count=parseInt(elem.task_count,10) - 1;
+        }
+    });
+  }
+
   // Get projects
-  $scope.setCurrentProjectId = function (event, projectId) {
-    console.log("setCurrentProject", projectId);
+  $scope.setCurrentProject = function (event, project) {
+    console.log("setCurrentProject", project);
     if(event)
    {   
        if(event.target)
@@ -65,38 +112,12 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
          angular.element(event.target).parent().addClass("current-project");
        }
     }
-    projectService.setCurrentProjectId(projectId);
-    $rootScope.$broadcast('setTaskList', projectId);
+    projectService.setCurrentProject(project);
+    $rootScope.$broadcast('setCurrentProject');
+    $rootScope.$broadcast('setTaskList', project);
     // $rootScope.$broadcast('switchProject', project);
   };
-// end fake data
 
-   $scope.showAddProjectDialog = function(ev) {
-    // Appending dialog to document.body to cover sidenav in docs app
-    var confirm = $mdDialog.prompt()
-      .clickOutsideToClose(true)
-      .title('What would you name your brand new project?')
-      .textContent('Bowser is a common name.')
-      .placeholder('Project name')
-      .ariaLabel('Project name')
-      .initialValue('Bowser')
-      .targetEvent(ev)
-      .ok('Okay!')
-      .cancel('Cancel');
-
-    $mdDialog.show(confirm).then(function(result) {
-      loadingScreenService.show();
-      projectService.createProject(authService.getCurrentSession(), result).then(function(result){
-
-        $rootScope.$broadcast('getProjects');
-      });
-    }, function() {
-      console.log("cancel");
-      $scope.status = 'Adding new project canceled.';
-    });
-  };
-
- 
-
+   
 
 } );

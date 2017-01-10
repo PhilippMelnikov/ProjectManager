@@ -22,8 +22,8 @@ app.config(function ($mdThemingProvider, $httpProvider) {
 
     $mdThemingProvider.theme('default')
       .primaryPalette('customPrimary')
-      .accentPalette('green');
-
+      .accentPalette('red');
+  // delete $httpProvider.defaults.headers.post['Content-type']
   // $httpProvider.defaults.useXDomain = true;
   // $httpProvider.defaults.withCredentials = true;
   // delete $httpProvider.defaults.headers.common["X-Requested-With"];

@@ -1,0 +1,23 @@
+<div ng-controller="AppCtrl" class="right-sidenav" id='create-project'>
+
+      <md-toolbar class="right-sidenav-top">
+        <div class="esc" ng-click="untoggle()">
+          <div class="esc-icon">
+            <i class="icons8-delete-2"></i>
+          </div>
+          <div class="esc-word">esc</div>
+        </div>
+        <h1>Create new project</h1>
+      </md-toolbar>
+      <md-content layout-padding="" >
+        <form>
+          <md-input-container md-no-float class="md-block">
+          <input ng-model="newProjectTitle" id="project-name-input" placeholder="Project name">
+        </md-input-container>
+        </form>
+        <md-button ng-click="createProject(newProjectTitle)" class="md-fab confirm-button md-primary" aria-label="confirm">
+              <i class="icons8-checkmark"></i>
+        </md-button>
+      </md-content>
+
+  </div>

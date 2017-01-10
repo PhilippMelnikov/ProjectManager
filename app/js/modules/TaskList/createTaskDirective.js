@@ -1,13 +1,12 @@
 import app from './modules/main'
 
-// Task List
-app.directive('taskList', function () {
+app.directive('createTask', function () {
     return {
       restrict: 'E',
       transclude: 'element',
-      templateUrl: './js/modules/TaskList/taskList.html',
+      templateUrl: './js/modules/TaskList/create.task.dialog.html',
       replace: true,
-      
+     
       controller: function ($scope) {
       
       }
