@@ -243,10 +243,10 @@ _main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDi
   // Get projects
   $scope.setCurrentProject = function (event, project) {
     console.log("setCurrentProject", project);
+    var projectListElements = document.getElementsByClassName("current-project");
+    angular.element(projectListElements).removeClass("current-project");
     if (event) {
       if (event.target) {
-        var projectListElements = document.getElementsByClassName("current-project");
-        angular.element(projectListElements).removeClass("current-project");
         angular.element(event.target).parent().addClass("current-project");
       }
     }
@@ -254,6 +254,379 @@ _main2.default.controller('ProjectListCtrl', function ($scope, $rootScope, $mdDi
     $rootScope.$broadcast('setCurrentProject');
     $rootScope.$broadcast('setTaskList', project);
     // $rootScope.$broadcast('switchProject', project);
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('createTask', function () {
+  return {
+    restrict: 'E',
+    transclude: 'element',
+    templateUrl: './js/modules/TaskList/create.task.dialog.html',
+    replace: true,
+
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Task List
+_main2.default.directive('openTask', function () {
+  return {
+    restrict: 'E',
+    transclude: 'element',
+    templateUrl: './js/modules/TaskList/open.task.dialog.html',
+    replace: true,
+
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialog, projectService, taskService, finalTaskListService, authService, loadingScreenService, loadingTaskService, $location) {
+  $scope.newTask = {
+    title: "",
+    description: ""
+  };
+  $scope.currentTask = {
+    title: "",
+    description: ""
+  };
+  $scope.searchQuery = "";
+  $scope.finalTaskList = [];
+
+  $scope.$on('setTaskList', function (event, project) {
+    setTaskList(authService.getCurrentSession(), project);
+  });
+
+  function setTaskList(currentSession, project) {
+    loadingScreenService.show();
+    taskService.fetchTasks(authService.getCurrentSession(), project).then(function (result) {
+      console.log(result);
+      finalTaskListService.formTaskList(result);
+      $scope.finalTaskList = finalTaskListService.getFinalTaskList();
+      console.log($scope.finalTaskList);
+      setTimeout(function () {
+        loadingScreenService.hide();
+      }, 300);
+      $scope.$apply();
+    });
+  };
+
+  $scope.$on('switchProject', function (event, project) {
+    projectService.setCurrentProject(project);
+    currentProject = projectService.getCurrentProject();
+    formListForShow();
+  });
+
+  $scope.searchTask = function (searchQuery) {
+    $('.match-not-found-screen').addClass('hidden');
+    console.log('search');
+    $scope.finalTaskList = finalTaskListService.search(searchQuery);
+    if (!$scope.finalTaskList[0]) {
+      $('.match-not-found-screen').removeClass('hidden');
+    }
+  };
+
+  function formListForShow() {
+    console.log("formListForShow");
+    $scope.finalTaskList = finalTaskListService.formTaskList(currentProject);
+  }
+
+  // push task into current project
+  $scope.createTask = function (task) {
+    $scope.$parent.untoggle();
+    loadingScreenService.show();
+    taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
+      taskService.fetchTask(authService.getCurrentSession(), result).then(function (res) {
+        finalTaskListService.postCreateAppendTask(res);
+        $scope.finalTaskList = finalTaskListService.getFinalTaskList();
+        console.log('final List', $scope.finalTaskList);
+        $rootScope.$broadcast('taskIncrement');
+        $scope.newTask = {
+          title: "",
+          description: ""
+        };
+        $scope.$apply();
+        loadingScreenService.hide();
+      });
+    });
+  };
+
+  $scope.openTask = function (title, description) {
+
+    $scope.currentTask = {
+      title: title,
+      description: description
+    };
+
+    $scope.$parent.toggleOpenTask();
+  };
+
+  $scope.completeTask = function (event, taskId) {
+    taskService.completeTask(authService.getCurrentSession(), taskId).then(function (result) {
+      var listLength = $scope.finalTaskList.length;
+      for (var i = 0; i < listLength; i++) {
+        for (var j = 0; j < $scope.finalTaskList[i].tasks.length; j++) {
+          if ($scope.finalTaskList[i].tasks[j].id == taskId) {
+            $scope.finalTaskList[i].tasks.splice(j, 1);
+            if ($scope.finalTaskList[i].tasks.length < 1) {
+              $scope.finalTaskList.splice(i, 1);
+              listLength -= 1;
+              $rootScope.$broadcast('taskDecrement');
+              break;
+            }
+            $rootScope.$broadcast('taskDecrement');
+          }
+        }
+      }
+
+      $scope.$apply();
+    });
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Task List
+_main2.default.directive('taskList', function () {
+  return {
+    restrict: 'E',
+    transclude: 'element',
+    templateUrl: './js/modules/TaskList/taskList.html',
+    replace: true,
+
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Seach Bar
+_main2.default.directive('searchBar', function () {
+  return {
+    restrict: 'E',
+    link: function link(scope, element, attrs) {
+
+      var searchButton = $("#search-button");;
+      var searchBar = $("#search-bar");
+      var active = false;
+      var clickPermission = true;
+
+      function activateDisactivateSearchBar() {
+        if (clickPermission) {
+          clickPermission = false;
+          setTimeout(function () {
+            clickPermission = true;
+          }, 200);
+          event.preventDefault();
+          active = !active;
+          if (active) {
+            searchBar.removeClass('not-active');
+            searchBar.addClass('active');
+            searchBar.find("input").focus();
+          } else {
+            searchBar.addClass('not-active');
+            setTimeout(function () {
+              searchBar.removeClass('active');
+              searchBar.find("input").val("");
+            }, 200);
+          }
+        } else {
+          console.log("doubleClick");
+        }
+      }
+
+      searchButton.on('click', function () {
+        activateDisactivateSearchBar();
+      });
+
+      searchBar.focusout(function (event) {
+        activateDisactivateSearchBar();
+      });
+    }
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Project List
+_main2.default.controller('toolbarCtrl', function ($scope, $rootScope, $mdDialog) {
+
+  $scope.newProjectTitle = "";
+
+  var editProject = function editProject(newTitle) {
+    $rootScope.$broadcast('editProject', newTitle);
+  };
+
+  var deleteProject = function deleteProject() {
+    console.log("deleteProject");
+    $rootScope.$broadcast('deleteProject');
+  };
+
+  $scope.showEditProjectDialog = function (ev) {
+    $mdDialog.show({
+      controller: DialogController,
+      templateUrl: 'js/modules/ProjectList/edit.project.dialog.html',
+      parent: angular.element(document.body),
+      targetEvent: ev,
+      clickOutsideToClose: true,
+      fullscreen: $scope.customFullscreen
+    }).then(function (date, text) {
+      $scope.status = 'You said the information was "' + '".';
+    }, function () {
+      $scope.status = 'You cancelled the dialog.';
+    });
+  };
+
+  function DialogController($scope, $mdDialog) {
+    $scope.hide = function () {
+      $mdDialog.hide();
+    };
+
+    $scope.cancel = function () {
+      $mdDialog.cancel();
+    };
+    $scope.answer = function (newTitle) {
+
+      editProject(newTitle);
+      $mdDialog.hide("answer");
+    };
+
+    $scope.confirmDelete = function () {
+      deleteProject();
+      $mdDialog.hide("answer");
+    };
+  }
+
+  $scope.showDeleteProjectDialog = function (ev) {
+    $mdDialog.show({
+      controller: DialogController,
+      templateUrl: 'js/modules/ProjectList/delete.project.dialog.html',
+      parent: angular.element(document.body),
+      targetEvent: ev,
+      clickOutsideToClose: true,
+      fullscreen: $scope.customFullscreen
+    }).then(function (date, text) {
+      $scope.status = 'You said the information was "' + '".';
+    }, function () {
+      $scope.status = 'You cancelled the dialog.';
+    });
+  };
+
+  // $scope.showDeleteConfirm = function(ev) {
+  //   // Appending dialog to document.body to cover sidenav in docs app
+  //   var confirm = $mdDialog.confirm()
+  //         .title('You are trying to delete your project?')
+  //         .textContent('Your project will be comletely deleted.')
+  //         .ariaLabel('Delete project')
+  //         .targetEvent(ev)
+  //         .ok('Please do it!')
+  //         .cancel('No. Why would i do that?');
+
+  //   $mdDialog.show(confirm).then(function() {
+  //   	deleteProject();
+  //     $scope.status = 'You decided to get rid of your project.';
+  //   }, function() {
+  //     $scope.status = 'You decided to keep your project.';
+  //   });
+  // };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('toolsMenu', function () {
+  return {
+    restrict: 'E',
+    link: function link(scope, element, attrs) {
+      var tButton = document.getElementById("tools-button");
+      var dMenu = document.getElementById("drop-down-menu");
+
+      var toolsButton = angular.element(tButton);
+      // var dropMenu = angular.element(dMenu);
+      var dropMenu = $("#drop-down-menu");
+      var active = false;
+      var clickPermission = true;
+      dropMenu.attr('tabindex', -1);
+
+      dropMenu.children().on('click', function () {
+        active = !active;
+      });
+
+      toolsButton.on('click', function (event) {
+        if (clickPermission) {
+          clickPermission = false;
+          setTimeout(function () {
+            clickPermission = true;
+          }, 200);
+          event.preventDefault();
+          active = !active;
+          if (active) {
+
+            dropMenu.removeClass('not-active');
+            dropMenu.addClass('active');
+            dropMenu.focus();
+          } else {}
+        } else {
+          console.log("doubleClick");
+        }
+      });
+
+      dropMenu.focusout(function (event) {
+        if (clickPermission) {
+          clickPermission = false;
+          setTimeout(function () {
+            clickPermission = true;
+          }, 200);
+          event.preventDefault();
+          active = !active;
+          dropMenu.addClass('not-active');
+          setTimeout(function () {
+            dropMenu.removeClass('active');
+          }, 200);
+        } else {
+          console.log("doubleClick");
+        }
+      });
+    }
   };
 });
 'use strict';
@@ -944,213 +1317,6 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Seach Bar
-_main2.default.directive('searchBar', function () {
-  return {
-    restrict: 'E',
-    link: function link(scope, element, attrs) {
-
-      var searchButton = $("#search-button");;
-      var searchBar = $("#search-bar");
-      var active = false;
-      var clickPermission = true;
-
-      function activateDisactivateSearchBar() {
-        if (clickPermission) {
-          clickPermission = false;
-          setTimeout(function () {
-            clickPermission = true;
-          }, 200);
-          event.preventDefault();
-          active = !active;
-          if (active) {
-            searchBar.removeClass('not-active');
-            searchBar.addClass('active');
-            searchBar.find("input").focus();
-          } else {
-            searchBar.addClass('not-active');
-            setTimeout(function () {
-              searchBar.removeClass('active');
-              searchBar.find("input").val("");
-            }, 200);
-          }
-        } else {
-          console.log("doubleClick");
-        }
-      }
-
-      searchButton.on('click', function () {
-        activateDisactivateSearchBar();
-      });
-
-      searchBar.focusout(function (event) {
-        activateDisactivateSearchBar();
-      });
-    }
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Project List
-_main2.default.controller('toolbarCtrl', function ($scope, $rootScope, $mdDialog) {
-
-  $scope.newProjectTitle = "";
-
-  var editProject = function editProject(newTitle) {
-    $rootScope.$broadcast('editProject', newTitle);
-  };
-
-  var deleteProject = function deleteProject() {
-    console.log("deleteProject");
-    $rootScope.$broadcast('deleteProject');
-  };
-
-  $scope.showEditProjectDialog = function (ev) {
-    $mdDialog.show({
-      controller: DialogController,
-      templateUrl: 'js/modules/ProjectList/edit.project.dialog.html',
-      parent: angular.element(document.body),
-      targetEvent: ev,
-      clickOutsideToClose: true,
-      fullscreen: $scope.customFullscreen
-    }).then(function (date, text) {
-      $scope.status = 'You said the information was "' + '".';
-    }, function () {
-      $scope.status = 'You cancelled the dialog.';
-    });
-  };
-
-  function DialogController($scope, $mdDialog) {
-    $scope.hide = function () {
-      $mdDialog.hide();
-    };
-
-    $scope.cancel = function () {
-      $mdDialog.cancel();
-    };
-    $scope.answer = function (newTitle) {
-
-      editProject(newTitle);
-      $mdDialog.hide("answer");
-    };
-
-    $scope.confirmDelete = function () {
-      deleteProject();
-      $mdDialog.hide("answer");
-    };
-  }
-
-  $scope.showDeleteProjectDialog = function (ev) {
-    $mdDialog.show({
-      controller: DialogController,
-      templateUrl: 'js/modules/ProjectList/delete.project.dialog.html',
-      parent: angular.element(document.body),
-      targetEvent: ev,
-      clickOutsideToClose: true,
-      fullscreen: $scope.customFullscreen
-    }).then(function (date, text) {
-      $scope.status = 'You said the information was "' + '".';
-    }, function () {
-      $scope.status = 'You cancelled the dialog.';
-    });
-  };
-
-  // $scope.showDeleteConfirm = function(ev) {
-  //   // Appending dialog to document.body to cover sidenav in docs app
-  //   var confirm = $mdDialog.confirm()
-  //         .title('You are trying to delete your project?')
-  //         .textContent('Your project will be comletely deleted.')
-  //         .ariaLabel('Delete project')
-  //         .targetEvent(ev)
-  //         .ok('Please do it!')
-  //         .cancel('No. Why would i do that?');
-
-  //   $mdDialog.show(confirm).then(function() {
-  //   	deleteProject();
-  //     $scope.status = 'You decided to get rid of your project.';
-  //   }, function() {
-  //     $scope.status = 'You decided to keep your project.';
-  //   });
-  // };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.directive('toolsMenu', function () {
-  return {
-    restrict: 'E',
-    link: function link(scope, element, attrs) {
-      var tButton = document.getElementById("tools-button");
-      var dMenu = document.getElementById("drop-down-menu");
-
-      var toolsButton = angular.element(tButton);
-      // var dropMenu = angular.element(dMenu);
-      var dropMenu = $("#drop-down-menu");
-      var active = false;
-      var clickPermission = true;
-      dropMenu.attr('tabindex', -1);
-
-      dropMenu.children().on('click', function () {
-        active = !active;
-      });
-
-      toolsButton.on('click', function (event) {
-        if (clickPermission) {
-          clickPermission = false;
-          setTimeout(function () {
-            clickPermission = true;
-          }, 200);
-          event.preventDefault();
-          active = !active;
-          if (active) {
-
-            dropMenu.removeClass('not-active');
-            dropMenu.addClass('active');
-            dropMenu.focus();
-          } else {}
-        } else {
-          console.log("doubleClick");
-        }
-      });
-
-      dropMenu.focusout(function (event) {
-        if (clickPermission) {
-          clickPermission = false;
-          setTimeout(function () {
-            clickPermission = true;
-          }, 200);
-          event.preventDefault();
-          active = !active;
-          dropMenu.addClass('not-active');
-          setTimeout(function () {
-            dropMenu.removeClass('active');
-          }, 200);
-        } else {
-          console.log("doubleClick");
-        }
-      });
-    }
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 _main2.default.controller('userProfileCtrl', function ($scope, $rootScope, authService) {
 	// Begin getting Session
 	$scope.session = "";
@@ -1192,172 +1358,6 @@ _main2.default.directive('userProfile', function () {
 
   };
 }); // User Profile
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.directive('createTask', function () {
-  return {
-    restrict: 'E',
-    transclude: 'element',
-    templateUrl: './js/modules/TaskList/create.task.dialog.html',
-    replace: true,
-
-    controller: function controller($scope) {}
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Task List
-_main2.default.directive('openTask', function () {
-  return {
-    restrict: 'E',
-    transclude: 'element',
-    templateUrl: './js/modules/TaskList/open.task.dialog.html',
-    replace: true,
-
-    controller: function controller($scope) {}
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialog, projectService, taskService, finalTaskListService, authService, loadingScreenService, loadingTaskService, $location) {
-  $scope.newTask = {
-    title: "",
-    description: ""
-  };
-  $scope.currentTask = {
-    title: "",
-    description: ""
-  };
-  $scope.searchQuery = "";
-  $scope.finalTaskList = [];
-
-  $scope.$on('setTaskList', function (event, project) {
-    setTaskList(authService.getCurrentSession(), project);
-  });
-
-  function setTaskList(currentSession, project) {
-    loadingScreenService.show();
-    taskService.fetchTasks(authService.getCurrentSession(), project).then(function (result) {
-      console.log(result);
-      finalTaskListService.formTaskList(result);
-      $scope.finalTaskList = finalTaskListService.getFinalTaskList();
-      console.log($scope.finalTaskList);
-      setTimeout(function () {
-        loadingScreenService.hide();
-      }, 300);
-      $scope.$apply();
-    });
-  };
-
-  $scope.$on('switchProject', function (event, project) {
-    projectService.setCurrentProject(project);
-    currentProject = projectService.getCurrentProject();
-    formListForShow();
-  });
-
-  $scope.searchTask = function (searchQuery) {
-    $('.match-not-found-screen').addClass('hidden');
-    console.log('search');
-    $scope.finalTaskList = finalTaskListService.search(searchQuery);
-    if (!$scope.finalTaskList[0]) {
-      $('.match-not-found-screen').removeClass('hidden');
-    }
-  };
-
-  function formListForShow() {
-    console.log("formListForShow");
-    $scope.finalTaskList = finalTaskListService.formTaskList(currentProject);
-  }
-
-  // push task into current project
-  $scope.createTask = function (task) {
-    $scope.$parent.untoggle();
-    loadingScreenService.show();
-    taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
-      taskService.fetchTask(authService.getCurrentSession(), result).then(function (res) {
-        finalTaskListService.postCreateAppendTask(res);
-        $scope.finalTaskList = finalTaskListService.getFinalTaskList();
-        console.log('final List', $scope.finalTaskList);
-        $rootScope.$broadcast('taskIncrement');
-        $scope.newTask = {
-          title: "",
-          description: ""
-        };
-        $scope.$apply();
-        loadingScreenService.hide();
-      });
-    });
-  };
-
-  $scope.openTask = function (title, description) {
-
-    $scope.currentTask = {
-      title: title,
-      description: description
-    };
-
-    $scope.$parent.toggleOpenTask();
-  };
-
-  $scope.completeTask = function (event, taskId) {
-    taskService.completeTask(authService.getCurrentSession(), taskId).then(function (result) {
-      var listLength = $scope.finalTaskList.length;
-      for (var i = 0; i < listLength; i++) {
-        for (var j = 0; j < $scope.finalTaskList[i].tasks.length; j++) {
-          if ($scope.finalTaskList[i].tasks[j].id == taskId) {
-            $scope.finalTaskList[i].tasks.splice(j, 1);
-            if ($scope.finalTaskList[i].tasks.length < 1) {
-              $scope.finalTaskList.splice(i, 1);
-              listLength -= 1;
-              $rootScope.$broadcast('taskDecrement');
-              break;
-            }
-            $rootScope.$broadcast('taskDecrement');
-          }
-        }
-      }
-
-      $scope.$apply();
-    });
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Task List
-_main2.default.directive('taskList', function () {
-  return {
-    restrict: 'E',
-    transclude: 'element',
-    templateUrl: './js/modules/TaskList/taskList.html',
-    replace: true,
-
-    controller: function controller($scope) {}
-  };
-});
 
 
 },{"./modules/main":2,"util":6}],2:[function(require,module,exports){

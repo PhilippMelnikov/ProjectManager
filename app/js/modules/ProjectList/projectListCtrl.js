@@ -103,12 +103,12 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
   // Get projects
   $scope.setCurrentProject = function (event, project) {
     console.log("setCurrentProject", project);
+    var projectListElements = document.getElementsByClassName("current-project");
+    angular.element(projectListElements).removeClass("current-project");
     if(event)
    {   
        if(event.target)
        {
-         var projectListElements = document.getElementsByClassName("current-project");
-         angular.element(projectListElements).removeClass("current-project");
          angular.element(event.target).parent().addClass("current-project");
        }
     }
