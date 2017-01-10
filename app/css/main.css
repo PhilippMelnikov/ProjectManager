@@ -482,6 +482,7 @@ md-toolbar {
 .right-sidenav {
   height: 100%;
   width: 452px;
+  padding-top: 15px;
   z-index: 65;
   background-color: #292c33!important;
   position: fixed;
@@ -537,7 +538,7 @@ md-toolbar {
   font-size: 11px;
   font-family: 'Roboto', sans-serif;
   font-weight: 300;
-  max-width: 355px;
+  max-width: 320px;
   margin: 0 auto;
   text-align: left;
   line-height: 25px;
@@ -563,7 +564,7 @@ md-toolbar {
 }
 .right-sidenav-top .instruments {
   position: absolute;
-  top: 13px;
+  top: 4px;
   right: 20px;
   font-size: 17px;
   color: rgba(255, 255, 255, 0.1);
