@@ -73,19 +73,21 @@ md-card-user-name {
 .add-project-block {
   margin-top: 19px;
   padding: 10px 13px 5px 35px;
+  height: 35px;
 }
 .add-project-block p {
   display: inline-block;
   color: #ccc;
   font-size: 11px;
   margin-left: 1px;
-  padding-top: 13px;
 }
 .add-project-block .md-button.md-icon-button {
   color: #fff;
   display: inline-block;
   font-size: 17px;
   float: right;
+  height: 20px;
+  line-height: 20px;
 }
 .project-list {
   color: #fff;
@@ -153,7 +155,6 @@ md-card-user-name {
       -ms-flex-line-pack: center;
           align-content: center;
   width: 100%;
-  min-height: 40px;
   line-height: 20px;
   padding: 10px 0px 10px 16px;
 }
