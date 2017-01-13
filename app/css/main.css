@@ -7,16 +7,17 @@ body {
 md-sidenav {
   width: 310px;
   height: 100%;
-  padding: 20px;
-  padding-top: 15px;
+  padding: 15px 0px;
   background-color: #292c33;
   position: relative;
+  overflow: hidden;
 }
 md-sidenav md-card {
   background-color: #292c33;
   -webkit-box-shadow: none;
           box-shadow: none;
   color: #fff;
+  padding: 0 20px;
 }
 md-sidenav md-card md-card-title {
   padding: 0;
@@ -69,21 +70,47 @@ md-card-user-name {
   font-size: 12px;
   margin-left: 29px;
 }
-.project-list {
-  margin-top: 14px;
-  color: #fff;
-  padding-left: 0;
-  font-size: 13px;
+.add-project-block {
+  margin-top: 19px;
+  padding: 10px 13px 5px 35px;
 }
-.project-list #add-project p {
+.add-project-block p {
+  display: inline-block;
   color: #ccc;
   font-size: 11px;
   margin-left: 1px;
+  padding-top: 13px;
 }
-.project-list #add-project .md-button.md-icon-button {
+.add-project-block .md-button.md-icon-button {
+  color: #fff;
+  display: inline-block;
   font-size: 17px;
-  margin-right: -15px;
-  padding: 0;
+  float: right;
+}
+.project-list {
+  color: #fff;
+  padding: 2px 20px;
+  margin-bottom: 100px;
+  font-size: 13px;
+  max-height: 60vh;
+  overflow: hidden;
+}
+.project-list:hover {
+  overflow-y: auto;
+}
+.project-list::-webkit-scrollbar {
+  width: 6px;
+  background-color: rgba(158, 158, 158, 0.5);
+}
+.project-list::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.1);
+  -webkit-border-radius: 10px;
+          border-radius: 10px;
+}
+.project-list::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 10px;
+          border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(158, 158, 158, 0.9);
 }
 .project-list md-list-item {
   padding: 0 15px;
@@ -108,6 +135,7 @@ md-card-user-name {
   padding: 0 0px;
   -webkit-border-radius: 5px;
           border-radius: 5px;
+  width: 270px;
   -webkit-transition: all 0.1s ease;
   transition: all 0.1s ease;
 }
@@ -125,9 +153,9 @@ md-card-user-name {
       -ms-flex-line-pack: center;
           align-content: center;
   width: 100%;
-  height: 40px;
-  line-height: 40px;
-  padding: 0 16px;
+  min-height: 40px;
+  line-height: 20px;
+  padding: 10px 0px 10px 16px;
 }
 .project-list .project-list-item p.ng-binding {
   display: block;
@@ -136,19 +164,23 @@ md-card-user-name {
   -webkit-margin-start: 0px;
   -webkit-margin-end: 0px;
   padding: 0;
+  width: 231px;
 }
 .log-out-container {
-  position: relative;
-  height: 100%;
-  min-height: 100px;
-  width: 100%;
+  background-color: #292c33;
+  width: 290px;
+  min-height: 90px;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  z-index: 60;
 }
 .log-out {
   font-size: 13px;
   color: #fff;
-  position: absolute;
-  bottom: 20px;
-  left: 15px;
+  position: relative;
+  line-height: 100px;
+  padding-left: 36px;
 }
 .log-out a {
   text-decoration: none;
@@ -163,6 +195,39 @@ md-content {
 md-toolbar {
   height: 45px;
   min-height: 45px;
+}
+.md-select-menu-container {
+  font-weight: 600!important;
+  font-size: 15px!important;
+  font-family: 'Roboto' !important;
+}
+.tools-container {
+  height: 30px;
+  width: 60px;
+  margin-right: 10px;
+  padding-bottom: 40px;
+}
+.tools-container i {
+  position: absolute;
+  top: 6px;
+  left: 22px;
+  font-size: 24px;
+}
+.tools-container md-select {
+  position: absolute;
+  top: 7px;
+  left: 17px;
+  width: 35px;
+}
+.tools-container md-select md-select-value {
+  border-bottom: none;
+}
+.tools-container md-select md-select-value span {
+  opacity: 0;
+}
+.tools-container md-select md-select-value.md-select-placeholder {
+  color: black;
+  border-bottom: none;
 }
 .dropdown-menu-container {
   background-color: #fff;
@@ -219,6 +284,16 @@ md-toolbar {
   -webkit-transition: all 0.1s;
   transition: all 0.1s;
 }
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding-left: 310px;
+}
+.task-list-content {
+  padding-top: 50px;
+}
 .md-menu-toolbar {
   background-color: #f7f7f7;
   color: #b3bbcb;
@@ -246,6 +321,7 @@ md-toolbar {
   vertical-align: middle;
 }
 .search-container .search-bar {
+  position: relative;
   display: inline-block;
   width: 200px;
   height: 35px;
@@ -255,6 +331,17 @@ md-toolbar {
   margin-bottom: 27px;
   display: none;
   vertical-align: middle;
+}
+.search-container .search-bar #clear-input {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+          transform: translateY(-50%);
+}
+.search-container .search-bar #clear-input:focus {
+  outline: 0;
 }
 .search-container .search-bar label {
   font-size: 10px;
@@ -280,8 +367,6 @@ md-toolbar {
   width: 550px;
   max-width: 550px;
   min-width: 100px;
-  -webkit-animation: appear 0.1s ease-out;
-          animation: appear 0.1s ease-out;
 }
 .tasks-for-a-day h4 {
   color: #b3bbcb;
@@ -308,17 +393,15 @@ md-toolbar {
   padding-bottom: 0;
 }
 .tasks-for-a-day .day-card .task-list-item {
-  height: 50px;
   min-height: 50px;
 }
 .tasks-for-a-day .day-card .task-text {
   width: 100%;
-  height: 50px;
-  line-height: 50px;
+  line-height: 20px;
   font-weight: 600;
   font-size: 13px;
   position: relative;
-  padding: 0 30px;
+  padding: 10px 30px;
 }
 .tasks-for-a-day .day-card .task-text:focus {
   outline: 0;
@@ -329,7 +412,7 @@ md-toolbar {
   left: -13px;
   bottom: 50%;
   width: 20px;
-  height: 30px;
+  height: 65%;
   border-right: 1px solid #eee;
   -webkit-transform: translateY(50%);
       -ms-transform: translateY(50%);
@@ -623,12 +706,22 @@ md-toolbar {
   -webkit-animation: disappear 0.2s ease-out;
           animation: disappear 0.2s ease-out;
 }
-.loading-circle {
-  margin-top: 15px;
+.loading-project {
   text-align: center;
+  margin: 5px 0;
 }
-.loading-circle img {
-  height: 40px;
+.loading-project img {
+  height: 25px;
+}
+.loading-task {
+  text-align: center;
+  margin-top: 15px;
+  margin-bottom: -5px;
+  -webkit-transition: all 0.1s ease;
+  transition: all 0.1s ease;
+}
+.loading-task img {
+  height: 30px;
 }
 .match-not-found-screen {
   color: #b1b1c8;
@@ -646,6 +739,40 @@ md-toolbar {
 }
 .match-not-found-screen h3 {
   margin-top: -10px;
+}
+.clearable {
+  background: #f7f7f7 url('../img/cross-128.png') no-repeat right -18px center !important;
+  background-size: 18px 18px !important;
+  padding-right: 18px !important;
+  -webkit-transition: background 0.2s;
+  transition: background 0.2s;
+}
+.clearable.x {
+  background-position: right 2px center !important;
+  -webkit-transition: background 0.2s !important;
+  transition: background 0.2s !important;
+}
+/* (jQ) Show icon */
+.clearable.onX {
+  cursor: pointer;
+}
+/* (jQ) hover cursor style */
+.clearable::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+/* Remove IE default X */
+.inputdemoErrors .inputErrorsApp {
+  min-height: 48px;
+}
+.inputdemoErrors md-input-container > p {
+  font-size: 0.8em;
+  text-align: left;
+  width: 100%;
+}
+.red-allert {
+  color: rgba(250, 127, 169, 0.9) !important;
 }
 @-webkit-keyframes appear {
   0% {
