@@ -118,7 +118,7 @@ app.service('projectService', function($http) {
   var setCurrentProject = function (project)
   {
     currentProject = project;
-    console.log('currentProjectId: ', currentProject);
+    console.log('currentProject: ', currentProject);
   }
 
   var getCurrentProjectId = function ()

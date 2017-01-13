@@ -18,17 +18,50 @@ app.config(function ($mdThemingProvider, $httpProvider) {
         'A400': '#e4e4ec',
         'A700': '#36364e'
     };
+
+    var customAccent = {
+        '50': '#f7f7f7',
+        '100': '#f7f7f7',
+        '200': '#f7f7f7',
+        '300': '#f7f7f7',
+        '400': '#f7f7f7',
+        '500': '#f7f7f7',
+        '600': '#f7f7f7',
+        '700': '#f7f7f7',
+        '800': '#f7f7f7',
+        '900': '#f7f7f7',
+        'A100': '#f7f7f7',
+        'A200': '#f7f7f7',
+        'A400': '#f7f7f7',
+        'A700': '#f7f7f7'
+    };
+
+    var customWarn = {
+        '50': '#bfbfbf',
+        '100': '#bfbfbf',
+        '200': '#bfbfbf',
+        '300': '#bfbfbf',
+        '400': '#bfbfbf',
+        '500': '#bfbfbf',
+        '600': '#bfbfbf',
+        '700': '#bfbfbf',
+        '800': '#bfbfbf',
+        '900': '#bfbfbf',
+        'A100': '#bfbfbf',
+        'A200': '#bfbfbf',
+        'A400': '#bfbfbf',
+        'A700': '#bfbfbf'
+    };
+
     $mdThemingProvider.definePalette('customPrimary', customPrimary);
+    $mdThemingProvider.definePalette('customAccent', customAccent);
+    $mdThemingProvider.definePalette('customWarn', customWarn);
 
     $mdThemingProvider.theme('default')
       .primaryPalette('customPrimary')
-      .accentPalette('red');
-  // delete $httpProvider.defaults.headers.post['Content-type']
-  // $httpProvider.defaults.useXDomain = true;
-  // $httpProvider.defaults.withCredentials = true;
-  // delete $httpProvider.defaults.headers.common["X-Requested-With"];
-  // $httpProvider.defaults.headers.common["Accept"] = "application/json";
-  // $httpProvider.defaults.headers.common["Content-Type"] = "application/json";
+      .accentPalette('customAccent')
+      .warnPalette('customWarn');
+ 
 
   });
 

@@ -10,9 +10,14 @@
         <h1>Create new task</h1>
       </md-toolbar>
       <md-content layout-padding="" >
-        <form>
+        <form name="taskForm">
         <md-input-container md-no-float class="md-block">
-          <input ng-model="newTask.title" id="task-name-input" placeholder="Task name">
+          <input required minlength="1" type="text" name="taskTitle" class="title-input" ng-model="newTask.title" id="task-name-input" placeholder="Task name"/>
+          <div ng-messages="taskForm.taskTitle.$error" role="alert">
+          <div class="red-allert" ng-message-exp="['required', 'minlength']">
+            Your title must be at least 1 character long.
+          </div>
+        </div>
         </md-input-container>
         <md-input-container md-no-float class="md-block">
           <input ng-model="newTask.description" id="task-description-input" placeholder="Description">

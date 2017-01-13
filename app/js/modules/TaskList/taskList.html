@@ -5,7 +5,7 @@
 				<md-card class="day-card" >
 				<md-list ng-cloak="">
 					<md-list-item ng-repeat="task in day.tasks" class="task-list-item">
-				    <div ng-click='openTask(task.title, task.description)' class="task-text">
+				    <div id="task-title-input" ng-click='openTask(task.title, task.description)' class="task-text">
 				     {{ task.title }}
 				    </div>
 				    <div class="complete" ng-click="completeTask($event, task.id)"></div>

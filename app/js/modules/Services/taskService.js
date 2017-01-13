@@ -29,8 +29,13 @@ app.service('taskService', function($http) {
           console.log('tasks for project', response.data.tasks)
           if (response.status == 200) 
           {
-            console.log('Tasks Fetched', response.data);
-            resolve(response.data.tasks);
+            let obj = {
+              projectId: project.id,
+              tasks: response.data.tasks
+            }
+            console.log('Tasks Fetched', obj);
+
+            resolve(obj);
           }
           else 
           {

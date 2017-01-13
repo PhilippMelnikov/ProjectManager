@@ -1,13 +1,30 @@
 import app from './modules/main'
 
 // Project List
-app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projectService, authService, loadingScreenService) {
-  // data
-  // $scope.projects = projectService.getProjects();
+app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projectService, authService, loadingImageService) {
+
 	$scope.projects = {
     projects: [],
     setProjects: function (projects) {
       this.projects = projects;
+    },
+    setTitle: function(id, newTitle){
+      for(let i = 0; i < this.projects.length; i++)
+      {
+        if(this.projects[i].id == id)
+        {
+          this.projects[i].title = newTitle;
+        }
+      }
+    },
+    deleteProject: function (id) {
+      for(let i = 0; i < this.projects.length; i++)
+      {
+        if(this.projects[i].id == id)
+        {
+          this.projects.splice(i,1);
+        }
+      }
     }
   };
   $scope.firstTime = true;
@@ -21,17 +38,26 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
 
   $scope.$on('createProject', function (event, title) {
       $scope.$parent.untoggle();
-      loadingScreenService.show();
+      loadingImageService.showProjectLoad();
       projectService.createProject(authService.getCurrentSession(), title)
       .then(function(result){
-        projectService.fetchProject(authService.getCurrentSession(), result).then(function(res){
-          projectService.appendProject(res);
-          $scope.setCurrentProject(undefined, res);
-          $scope.$apply();
-        });
+
+        let obj = new Object();
+        obj.id = result;
+        obj.task_count = 0;
+        obj.title = title;
+        appendProject(obj);
+        $scope.setCurrentProject(undefined, obj, false);
+        loadingImageService.hideProjectLoad();
 
       });
   });
+
+  function appendProject (project) {
+    projectService.appendProject(project);
+    $scope.$apply();
+    console.log("$scope.projects.projects", $scope.projects.projects);
+  }
 
   $scope.$on('taskIncrement', function (event) {
     $scope.taskIncrement();
@@ -43,24 +69,24 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
 
    $scope.$on('editProject', function (event, newTitle) {
     $scope.$parent.untoggle();
-    loadingScreenService.show();
     projectService.editProject(authService.getCurrentSession(), newTitle)
     .then(function (result) {
-      getProjects ();
     });
+    $scope.projects.setTitle(projectService.getCurrentProjectId(), newTitle);
    });
 
    $scope.$on('deleteProject', function (event) {
     $scope.$parent.untoggle();
-    loadingScreenService.show();
     projectService.deleteProject(authService.getCurrentSession())
     .then(function (result) {
-      getProjects ();
+      $scope.projects.deleteProject(projectService.getCurrentProjectId());
+      $scope.$apply();
+      $scope.setCurrentProject(undefined, $scope.projects.projects[0], false, true);
 
     });
    });
 
-  function getProjects (){
+  function getProjects () {
 
     projectService.getUserProjects(authService.getCurrentSession())
     .then(function(result){
@@ -70,11 +96,11 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
       $scope.$apply(function () {
 
       $scope.projects.setProjects(projects);
-      loadingScreenService.hide();
+      loadingImageService.hideLoadingScreen();
       if($scope.firstTime)
       {
         $scope.firstTime = false;
-        $scope.setCurrentProject(undefined, $scope.projects.projects[0]);
+        $scope.setCurrentProject(undefined, $scope.projects.projects[0], true, false);
       }
     });
       console.log("new Projects",$scope.projects.projects);
@@ -100,8 +126,7 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
     });
   }
 
-  // Get projects
-  $scope.setCurrentProject = function (event, project) {
+  $scope.setCurrentProject = function (event, project, onLoad, onDelete) {
     console.log("setCurrentProject", project);
     var projectListElements = document.getElementsByClassName("current-project");
     angular.element(projectListElements).removeClass("current-project");
@@ -114,8 +139,19 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
     }
     projectService.setCurrentProject(project);
     $rootScope.$broadcast('setCurrentProject');
-    $rootScope.$broadcast('setTaskList', project);
-    // $rootScope.$broadcast('switchProject', project);
+    // $rootScope.$broadcast('setTaskList', project);
+    if(onLoad)
+    {
+      $rootScope.$broadcast('getAllTheTasks', $scope.projects);
+    }
+    else
+    {
+      if(onDelete)
+      {$rootScope.$broadcast('setTasksOnDeleteProject');}
+      else
+      {$rootScope.$broadcast('setTasksForCurrentProject');}
+
+    }
   };
 
    

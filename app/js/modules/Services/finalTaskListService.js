@@ -138,6 +138,10 @@ app.service('finalTaskListService', function() {
       return finalTaskList;
     };
 
+    var setFinalTaskList = function (list) {
+      finalTaskList = list;
+    };    
+
     var search = function (searchText) {
       searchResults = angular.copy(finalTaskList);
       if(searchText=='')
@@ -151,7 +155,7 @@ app.service('finalTaskListService', function() {
            var res = -1;
            for(var key in element)
            {
-            if(key!='image')
+            if(key=='title')
               {
                 // console.log('element[key] ', element[key]);
                 if(util.isString(element[key]))
@@ -238,6 +242,7 @@ app.service('finalTaskListService', function() {
 
     return {
       formTaskList: formTaskList,
+      setFinalTaskList: setFinalTaskList,
       getFinalTaskList: getFinalTaskList,
       search: search,
       postCreateAppendTask: postCreateAppendTask,
