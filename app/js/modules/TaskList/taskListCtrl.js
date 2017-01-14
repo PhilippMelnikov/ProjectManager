@@ -18,6 +18,8 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
   $scope.dadeOut= false;
   $scope.hidden= true;
 
+  var onCreate = false;
+
 
   $scope.$on('getAllTheTasks', function (event, projects) {
     loadingImageService.showLoadingScreen();
@@ -33,12 +35,17 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
   })
 
   $scope.$on('resetNewTask', function (event) {
-     $scope.newTask = {
-      id: "",
-      title: "",
-      description: "",
-      created_at: ""
-    };
+    if(!onCreate)
+   { 
+    setTimeout(function(){
+          $scope.newTask = {
+           id: "",
+           title: "",
+           description: "",
+           created_at: ""
+         };
+       },500);
+  }
   })
 
   function getAllTheTasks (projects)
@@ -138,7 +145,6 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
   $scope.clearSearchInput = function () {
     $scope.clearSerchInputEvent = true;
     this.searchQuery = "";
-    // $("#search-input").focus();
     console.log("clear active", $scope.active);
     $('.match-not-found-screen').addClass('hidden');
   }
@@ -151,6 +157,7 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
 
   // push task into current project
   function createTask (task) {
+    onCreate = true;
     $scope.$parent.untoggle();
     loadingImageService.showTaskLoad();
     taskService.createTask(authService.getCurrentSession(),projectService.getCurrentProjectId(), task)
@@ -178,6 +185,7 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
       description: "",
       created_at: ""
       };
+      onCreate = false;
       loadingImageService.hideTaskLoad();
       $scope.$apply();
     });

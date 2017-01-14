@@ -1385,6 +1385,8 @@ _main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialo
   $scope.dadeOut = false;
   $scope.hidden = true;
 
+  var onCreate = false;
+
   $scope.$on('getAllTheTasks', function (event, projects) {
     loadingImageService.showLoadingScreen();
     getAllTheTasks(projects);
@@ -1399,12 +1401,16 @@ _main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialo
   });
 
   $scope.$on('resetNewTask', function (event) {
-    $scope.newTask = {
-      id: "",
-      title: "",
-      description: "",
-      created_at: ""
-    };
+    if (!onCreate) {
+      setTimeout(function () {
+        $scope.newTask = {
+          id: "",
+          title: "",
+          description: "",
+          created_at: ""
+        };
+      }, 500);
+    }
   });
 
   function getAllTheTasks(projects) {
@@ -1488,7 +1494,6 @@ _main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialo
   $scope.clearSearchInput = function () {
     $scope.clearSerchInputEvent = true;
     this.searchQuery = "";
-    // $("#search-input").focus();
     console.log("clear active", $scope.active);
     $('.match-not-found-screen').addClass('hidden');
   };
@@ -1500,6 +1505,7 @@ _main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialo
 
   // push task into current project
   function createTask(task) {
+    onCreate = true;
     $scope.$parent.untoggle();
     loadingImageService.showTaskLoad();
     taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
@@ -1524,6 +1530,7 @@ _main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialo
         description: "",
         created_at: ""
       };
+      onCreate = false;
       loadingImageService.hideTaskLoad();
       $scope.$apply();
     });
