@@ -12,16 +12,20 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
   $scope.dadeOut= false;
   $scope.hidden= true;
   $scope.closeRightSidenav = function () {
+
     return function () {
 
-      setTimeout(function(){
-        $scope.newProjectTitle = '';
-        $rootScope.$broadcast('resetNewTask');
+        $scope.newProjectTitle = 'lololo';
+
+        setTimeout(function(){
+          console.log('onesc apply', $scope.newProjectTitle);
+          $scope.newProjectTitle = '';
+          $scope.$apply();
+          $rootScope.$broadcast('resetNewTask');
       },100);
 
       $scope.dadeOut= false;
       $scope.hidden= true;
-      console.log('closeRightSidenav');
       var darkenTheScreen = angular.element( document.querySelector( '.darken-the-screen') );
       var myNav = angular.element( document.querySelector( '.sidenav-open') );
       myNav.removeClass('sidenav-open');
@@ -44,7 +48,6 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
     }
 
     $scope.createProject = function(title) {
-      console.log("Титл", title);
       if((title !== '') && (title !== ' ') && (title !== '\t') && (title !== '\n') && (title))
         { 
           setTimeout(function(){
@@ -114,7 +117,7 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
         {
           var keyCode = event.keyCode.toString();
         Altexpression = Altexpression + keyCode;
-        console.log('input',Altexpression);
+
         var espression = "969798103";
         if(Altexpression == espression)
           {
@@ -133,7 +136,6 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
     }
     $('.title-input').on( "input",function(event){
 
-      console.log(this.value.length);
       if(this.value.length == 1 && redFlag)
       {
         this.value = "";

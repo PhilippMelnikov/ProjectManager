@@ -43,13 +43,16 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
     if(!onCreate)
    { 
     setTimeout(function(){
-          $scope.newTask = {
-           id: "",
-           title: "",
-           description: "",
-           created_at: ""
-         };
-       },500);
+         $scope.newTask.title = 'lololo';
+         $scope.newTask.description = 'lalala';
+         $scope.$apply();
+         $scope.newTask.title = '';
+         $scope.newTask.description = '';
+         $scope.newTask.id = '';
+         $scope.newTask.created_at = '';
+         $rootScope.$apply();
+          
+       },200);
   }
   })
 
@@ -88,7 +91,6 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
     if(currentProj[0])
     {
       let tasks = currentProj[0].tasks;
-        console.log("current project finaly ", tasks);
        
         finalTaskListService.formTaskList(tasks);
         $scope.finalTaskList = finalTaskListService.getFinalTaskList();
@@ -164,6 +166,7 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
   function createTask (task) {
     onCreate = true;
     $scope.$parent.untoggle();
+    $('#create-task-button').attr("disabled", true);
     loadingImageService.showTaskLoad();
     taskService.createTask(authService.getCurrentSession(),projectService.getCurrentProjectId(), task)
     .then(function(result){
@@ -193,6 +196,7 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
       onCreate = false;
       loadingImageService.hideTaskLoad();
       $scope.$apply();
+      $('#create-task-button').attr("disabled", false);
     });
   }
 
