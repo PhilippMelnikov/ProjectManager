@@ -445,6 +445,11 @@ md-toolbar {
   position: fixed;
   bottom: 25px;
   right: 25px;
+  -webkit-transition: background 0.2s ease-in-out;
+  transition: background 0.2s ease-in-out;
+}
+.md-fab.add-task:disabled {
+  background-color: #bbb;
 }
 .add-task-form .md-button.md-icon-button {
   margin: 0 6px 0 -9px;

@@ -514,6 +514,11 @@ md-toolbar
 	position: fixed;
 	bottom: 25px;
 	right: 25px;
+	transition: background 0.2s ease-in-out;
+	&:disabled 
+	{
+    	background-color: #bbb;
+	}
 }
 
 .add-task-form
@@ -874,6 +879,7 @@ span.l-6 {animation-delay: 0;}
 	animation: disappear 0.2s ease-in-out;
 	opacity: 0;
 }
+
 @keyframes appear
 {
 	0%{opacity: 0;}
