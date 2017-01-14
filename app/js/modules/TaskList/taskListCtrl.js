@@ -15,6 +15,9 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
   $scope.finalTaskList = [];
   $scope.AllTheTasksList = [];
 
+  $scope.dadeOut= false;
+  $scope.hidden= true;
+
 
   $scope.$on('getAllTheTasks', function (event, projects) {
     loadingImageService.showLoadingScreen();
@@ -27,6 +30,15 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
 
   $scope.$on('setTasksOnDeleteProject', function (event) {
     setTaskList(false);
+  })
+
+  $scope.$on('resetNewTask', function (event) {
+     $scope.newTask = {
+      id: "",
+      title: "",
+      description: "",
+      created_at: ""
+    };
   })
 
   function getAllTheTasks (projects)
@@ -171,12 +183,19 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
     });
   }
 
+
   $scope.createTask = function (task)
   {
      console.log("alt code", task.title);
-     if((task.title !== '') && (task.title !== ' ') && (task.title !== '\t') && (task.title !== '\n'))
+     if((task.title !== '') && (task.title !== ' ') && (task.title !== '\t') && (task.title !== '\n') && (task.title))
       {
+        console.log("create task no mater what");
         createTask(task);
+      }
+      else
+      {
+        $scope.hidden = false;
+        $scope.fadeOut = false;
       }
   }
 

@@ -13,8 +13,8 @@
         <form name="taskForm">
         <md-input-container md-no-float class="md-block">
           <input required minlength="1" type="text" name="taskTitle" class="title-input" ng-model="newTask.title" id="task-name-input" placeholder="Task name"/>
-          <div ng-messages="taskForm.taskTitle.$error" role="alert">
-          <div class="red-allert" ng-message-exp="['required', 'minlength']">
+          <div role="alert">
+          <div class="red-allert" ng-class="{ 'fade-out': fadeOut, 'hidden': hidden}">
             Your title must be at least 1 character long.
           </div>
         </div>

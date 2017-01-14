@@ -13,8 +13,8 @@
         <form name="editProjectForm">
           <md-input-container md-no-float class="md-block">
           <input required minlength="1" type="text" name="newProjectTitle" class="title-input" ng-model="newProjectTitle" id="project-name-input" placeholder="{{currentProject.title}}">
-          <div ng-messages="editProjectForm.newProjectTitle.$error" role="alert">
-          <div class="red-allert" ng-message-exp="['required', 'minlength']">
+          <div role="alert">
+          <div class="red-allert" ng-class="{ 'fade-out': fadeOut, 'hidden': hidden}">
             Your title must be at least 1 character long.
           </div>
         </div>

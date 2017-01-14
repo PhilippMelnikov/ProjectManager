@@ -8,9 +8,19 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
   $scope.$on('setCurrentProject', function (event) {
     $scope.currentProject=projectService.getCurrentProject();
   });
-
+  
+  $scope.dadeOut= false;
+  $scope.hidden= true;
   $scope.closeRightSidenav = function () {
     return function () {
+
+      setTimeout(function(){
+        $scope.newProjectTitle = '';
+        $rootScope.$broadcast('resetNewTask');
+      },100);
+
+      $scope.dadeOut= false;
+      $scope.hidden= true;
       console.log('closeRightSidenav');
       var darkenTheScreen = angular.element( document.querySelector( '.darken-the-screen') );
       var myNav = angular.element( document.querySelector( '.sidenav-open') );
@@ -34,13 +44,20 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
     }
 
     $scope.createProject = function(title) {
-      title.trim();
       console.log("Титл", title);
-      if((title !== '') && (title !== ' ') && (title !== '\t') && (title !== '\n'))
+      if((title !== '') && (title !== ' ') && (title !== '\t') && (title !== '\n') && (title))
         { 
-          $scope.newProjectTitle = '';
+          setTimeout(function(){
+            $scope.newProjectTitle = '';
+          },100);
           $rootScope.$broadcast('createProject', title);
         }
+        else
+        {
+          $scope.hidden = false;
+          $scope.fadeOut = false;
+        }
+        
     }
 
     $scope.deleteProject = function() {
@@ -48,17 +65,35 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
     }
 
     $scope.editProject = function(newTitle) {
-      if((newTitle !== '') && (newTitle !== ' ') && (newTitle !== '\t') && (newTitle !== '\n'))
+      if((newTitle !== '') && (newTitle !== ' ') && (newTitle !== '\t') && (newTitle !== '\n') && (newTitle))
       { 
-          $scope.newProjectTitle = '';
+          setTimeout(function(){
+            $scope.newProjectTitle = '';
+          },100);
           $rootScope.$broadcast('editProject', newTitle);
       }
+      else
+      {
+        $scope.hidden = false;
+        $scope.fadeOut = false;
+      }
+     
     }
     var altPressed = false;
     var Altexpression = "";
     var redFlag = false;
 
-    $('.title-input').on("keydown",function(event){
+
+    $('.title-input').on("keypress",function(event){
+
+      $scope.fadeOut = true;
+      setTimeout(function(){
+       hide();
+      },100)
+    })
+
+     $('.title-input').on("keydown",function(event){
+
       if(event.altKey==true)
       {
         altPressed = true;
@@ -67,6 +102,7 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
 
     $('.title-input').on( "keyup",function(event){
 
+   
       if(this.value.length == 0)
       {
           if(event.keyCode==18)
@@ -89,7 +125,14 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
       }
      
     })
+    function hide() {
+
+         setTimeout(function(){
+          $scope.hidden = true;
+         }, 100)
+    }
     $('.title-input').on( "input",function(event){
+
       console.log(this.value.length);
       if(this.value.length == 1 && redFlag)
       {
@@ -97,7 +140,7 @@ app.controller('AppCtrl', function($scope, $rootScope, $timeout, projectService)
         redFlag = false;
       }
     })
- 
+
   $scope.toggleCreateProject = $scope.openRightSidenav('create-project');
   $scope.toggleDeleteProject = $scope.openRightSidenav('delete-project');
   $scope.toggleEditProject = $scope.openRightSidenav('edit-project');
