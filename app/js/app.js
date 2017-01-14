@@ -81,8 +81,18 @@ _main2.default.controller('AppCtrl', function ($scope, $rootScope, $timeout, pro
     $scope.currentProject = projectService.getCurrentProject();
   });
 
+  $scope.dadeOut = false;
+  $scope.hidden = true;
   $scope.closeRightSidenav = function () {
     return function () {
+
+      setTimeout(function () {
+        $scope.newProjectTitle = '';
+        $rootScope.$broadcast('resetNewTask');
+      }, 100);
+
+      $scope.dadeOut = false;
+      $scope.hidden = true;
       console.log('closeRightSidenav');
       var darkenTheScreen = angular.element(document.querySelector('.darken-the-screen'));
       var myNav = angular.element(document.querySelector('.sidenav-open'));
@@ -105,11 +115,15 @@ _main2.default.controller('AppCtrl', function ($scope, $rootScope, $timeout, pro
   };
 
   $scope.createProject = function (title) {
-    title.trim();
     console.log("Титл", title);
-    if (title !== '' && title !== ' ' && title !== '\t' && title !== '\n') {
-      $scope.newProjectTitle = '';
+    if (title !== '' && title !== ' ' && title !== '\t' && title !== '\n' && title) {
+      setTimeout(function () {
+        $scope.newProjectTitle = '';
+      }, 100);
       $rootScope.$broadcast('createProject', title);
+    } else {
+      $scope.hidden = false;
+      $scope.fadeOut = false;
     }
   };
 
@@ -118,16 +132,30 @@ _main2.default.controller('AppCtrl', function ($scope, $rootScope, $timeout, pro
   };
 
   $scope.editProject = function (newTitle) {
-    if (newTitle !== '' && newTitle !== ' ' && newTitle !== '\t' && newTitle !== '\n') {
-      $scope.newProjectTitle = '';
+    if (newTitle !== '' && newTitle !== ' ' && newTitle !== '\t' && newTitle !== '\n' && newTitle) {
+      setTimeout(function () {
+        $scope.newProjectTitle = '';
+      }, 100);
       $rootScope.$broadcast('editProject', newTitle);
+    } else {
+      $scope.hidden = false;
+      $scope.fadeOut = false;
     }
   };
   var altPressed = false;
   var Altexpression = "";
   var redFlag = false;
 
+  $('.title-input').on("keypress", function (event) {
+
+    $scope.fadeOut = true;
+    setTimeout(function () {
+      hide();
+    }, 100);
+  });
+
   $('.title-input').on("keydown", function (event) {
+
     if (event.altKey == true) {
       altPressed = true;
     }
@@ -152,7 +180,14 @@ _main2.default.controller('AppCtrl', function ($scope, $rootScope, $timeout, pro
       }
     }
   });
+  function hide() {
+
+    setTimeout(function () {
+      $scope.hidden = true;
+    }, 100);
+  }
   $('.title-input').on("input", function (event) {
+
     console.log(this.value.length);
     if (this.value.length == 1 && redFlag) {
       this.value = "";
@@ -1064,267 +1099,6 @@ var _main2 = _interopRequireDefault(_main);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_main2.default.directive('createTask', function () {
-  return {
-    restrict: 'E',
-    transclude: 'element',
-    templateUrl: './js/modules/TaskList/create.task.dialog.html',
-    replace: true,
-
-    controller: function controller($scope) {}
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Task List
-_main2.default.directive('openTask', function () {
-  return {
-    restrict: 'E',
-    transclude: 'element',
-    templateUrl: './js/modules/TaskList/open.task.dialog.html',
-    replace: true,
-
-    controller: function controller($scope) {}
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialog, projectService, taskService, finalTaskListService, authService, loadingImageService, $location) {
-  $scope.newTask = {
-    id: "",
-    title: "",
-    description: "",
-    created_at: ""
-  };
-  $scope.currentTask = {
-    title: "",
-    description: ""
-  };
-  $scope.searchQuery = "";
-  $scope.finalTaskList = [];
-  $scope.AllTheTasksList = [];
-
-  $scope.$on('getAllTheTasks', function (event, projects) {
-    loadingImageService.showLoadingScreen();
-    getAllTheTasks(projects);
-  });
-
-  $scope.$on('setTasksForCurrentProject', function (event) {
-    setTaskList(true);
-  });
-
-  $scope.$on('setTasksOnDeleteProject', function (event) {
-    setTaskList(false);
-  });
-
-  function getAllTheTasks(projects) {
-    var fetchTasksPromises = [];
-    for (var i = 0; i < projects.projects.length; i++) {
-      fetchTasksPromises.push(taskService.fetchTasks(authService.getCurrentSession(), projects.projects[i]));
-    }
-    Promise.all(fetchTasksPromises).then(function (results) {
-      for (var j = 0; j < results.length; j++) {
-        var obj = {
-          projectId: results[j].projectId,
-          tasks: results[j].tasks
-        };
-        $scope.AllTheTasksList.push(obj);
-      }
-      console.log("Finished fetching AllTheTasks");
-      console.log($scope.AllTheTasksList);
-      setTaskList();
-      loadingImageService.hideLoadingScreen();
-    });
-  }
-
-  function setTaskList(onSwitch) {
-    console.log("entered setTaskList");
-    var curProjId = projectService.getCurrentProjectId();
-
-    var currentProj = $scope.AllTheTasksList.filter(function (elem) {
-      return elem.projectId == curProjId;
-    });
-    if (currentProj[0]) {
-      var tasks = currentProj[0].tasks;
-      console.log("current project finaly ", tasks);
-
-      finalTaskListService.formTaskList(tasks);
-      $scope.finalTaskList = finalTaskListService.getFinalTaskList();
-      if (!onSwitch) $scope.$apply();
-      console.log("finalTaskList ", $scope.finalTaskList);
-    } else {
-      var obj = new Object();
-      obj.projectId = curProjId;
-      obj.tasks = [];
-      console.log("new Project with no tasks", obj);
-      $scope.AllTheTasksList.push(obj);
-      finalTaskListService.formTaskList(obj.tasks);
-      $scope.finalTaskList = finalTaskListService.getFinalTaskList();
-      $scope.$apply();
-    }
-  }
-
-  function isEquivalent(a, b) {
-    if (a.length !== b.length) {
-      return false;
-    }
-    for (var i = 0; i < a.length; i++) {
-      if (a[i].tasks.length !== b[i].tasks.length) {
-        return false;
-      }
-      for (var j = 0; j < a[i].tasks.length; j++) {
-        if (a[i].tasks[j].title !== b[i].tasks[j].title) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  $scope.searchTask = function (searchQuery) {
-    $('.match-not-found-screen').addClass('hidden');
-    console.log('search');
-    var list = finalTaskListService.search(searchQuery);
-    if (!isEquivalent(list, $scope.finalTaskList)) {
-      console.log("signal");
-      $scope.finalTaskList = list;
-    }
-
-    if (!$scope.finalTaskList[0] && searchQuery !== "") {
-      $('.match-not-found-screen').removeClass('hidden');
-    }
-  };
-  $scope.clearSerchInputEvent = false;
-  $scope.clearSearchInput = function () {
-    $scope.clearSerchInputEvent = true;
-    this.searchQuery = "";
-    // $("#search-input").focus();
-    console.log("clear active", $scope.active);
-    $('.match-not-found-screen').addClass('hidden');
-  };
-
-  function formListForShow() {
-    console.log("formListForShow");
-    $scope.finalTaskList = finalTaskListService.formTaskList(currentProject);
-  }
-
-  // push task into current project
-  function createTask(task) {
-    $scope.$parent.untoggle();
-    loadingImageService.showTaskLoad();
-    taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
-      $scope.newTask.id = result;
-      $scope.newTask.created_at = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-      finalTaskListService.postCreateAppendTask($scope.newTask);
-      $scope.finalTaskList = finalTaskListService.getFinalTaskList();
-      console.log('final List after create task', $scope.finalTaskList);
-      $rootScope.$broadcast('taskIncrement');
-      for (var i = 0; i < $scope.AllTheTasksList.length; i++) {
-        if ($scope.AllTheTasksList[i].projectId == projectService.getCurrentProjectId()) {
-          var Task = {
-            Task: $scope.newTask
-          };
-          $scope.AllTheTasksList[i].tasks.unshift(Task);
-        }
-      }
-
-      $scope.newTask = {
-        id: "",
-        title: "",
-        description: "",
-        created_at: ""
-      };
-      loadingImageService.hideTaskLoad();
-      $scope.$apply();
-    });
-  }
-
-  $scope.createTask = function (task) {
-    console.log("alt code", task.title);
-    if (task.title !== '' && task.title !== ' ' && task.title !== '\t' && task.title !== '\n') {
-      createTask(task);
-    }
-  };
-
-  $scope.openTask = function (title, description) {
-
-    $scope.currentTask = {
-      title: title,
-      description: description
-    };
-
-    $scope.$parent.toggleOpenTask();
-  };
-
-  $scope.completeTask = function (event, taskId) {
-    taskService.completeTask(authService.getCurrentSession(), taskId).then(function (result) {});
-
-    var listLength = $scope.finalTaskList.length;
-    for (var i = 0; i < listLength; i++) {
-      for (var j = 0; j < $scope.finalTaskList[i].tasks.length; j++) {
-        if ($scope.finalTaskList[i].tasks[j].id == taskId) {
-          $scope.finalTaskList[i].tasks.splice(j, 1);
-          if ($scope.finalTaskList[i].tasks.length < 1) {
-            $scope.finalTaskList.splice(i, 1);
-            listLength -= 1;
-            $rootScope.$broadcast('taskDecrement');
-            break;
-          }
-          $rootScope.$broadcast('taskDecrement');
-        }
-      }
-    }
-
-    var AllTheTasksListLength = $scope.AllTheTasksList.length;
-    for (var _i = 0; _i < AllTheTasksListLength; _i++) {
-      for (var _j = 0; _j < $scope.AllTheTasksList[_i].tasks.length; _j++) {
-        if ($scope.AllTheTasksList[_i].tasks[_j].Task.id == taskId) {
-          console.log("AllTheTasksList[i].tasks[j] deleted", $scope.AllTheTasksList[_i].tasks[_j].Task.id);
-          $scope.AllTheTasksList[_i].tasks.splice(_j, 1);
-        }
-      }
-    }
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Task List
-_main2.default.directive('taskList', function () {
-  return {
-    restrict: 'E',
-    transclude: 'element',
-    templateUrl: './js/modules/TaskList/taskList.html',
-    replace: true,
-
-    controller: function controller($scope) {}
-  };
-});
-'use strict';
-
-var _main = require('./modules/main');
-
-var _main2 = _interopRequireDefault(_main);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // Seach Bar
 _main2.default.directive('searchBar', function () {
   return {
@@ -1546,6 +1320,283 @@ _main2.default.directive('toolsMenu', function () {
         }
       });
     }
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.directive('createTask', function () {
+  return {
+    restrict: 'E',
+    transclude: 'element',
+    templateUrl: './js/modules/TaskList/create.task.dialog.html',
+    replace: true,
+
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Task List
+_main2.default.directive('openTask', function () {
+  return {
+    restrict: 'E',
+    transclude: 'element',
+    templateUrl: './js/modules/TaskList/open.task.dialog.html',
+    replace: true,
+
+    controller: function controller($scope) {}
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_main2.default.controller('TaskListCtrl', function ($scope, $rootScope, $mdDialog, projectService, taskService, finalTaskListService, authService, loadingImageService, $location) {
+  $scope.newTask = {
+    id: "",
+    title: "",
+    description: "",
+    created_at: ""
+  };
+  $scope.currentTask = {
+    title: "",
+    description: ""
+  };
+  $scope.searchQuery = "";
+  $scope.finalTaskList = [];
+  $scope.AllTheTasksList = [];
+
+  $scope.dadeOut = false;
+  $scope.hidden = true;
+
+  $scope.$on('getAllTheTasks', function (event, projects) {
+    loadingImageService.showLoadingScreen();
+    getAllTheTasks(projects);
+  });
+
+  $scope.$on('setTasksForCurrentProject', function (event) {
+    setTaskList(true);
+  });
+
+  $scope.$on('setTasksOnDeleteProject', function (event) {
+    setTaskList(false);
+  });
+
+  $scope.$on('resetNewTask', function (event) {
+    $scope.newTask = {
+      id: "",
+      title: "",
+      description: "",
+      created_at: ""
+    };
+  });
+
+  function getAllTheTasks(projects) {
+    var fetchTasksPromises = [];
+    for (var i = 0; i < projects.projects.length; i++) {
+      fetchTasksPromises.push(taskService.fetchTasks(authService.getCurrentSession(), projects.projects[i]));
+    }
+    Promise.all(fetchTasksPromises).then(function (results) {
+      for (var j = 0; j < results.length; j++) {
+        var obj = {
+          projectId: results[j].projectId,
+          tasks: results[j].tasks
+        };
+        $scope.AllTheTasksList.push(obj);
+      }
+      console.log("Finished fetching AllTheTasks");
+      console.log($scope.AllTheTasksList);
+      setTaskList();
+      loadingImageService.hideLoadingScreen();
+    });
+  }
+
+  function setTaskList(onSwitch) {
+    console.log("entered setTaskList");
+    var curProjId = projectService.getCurrentProjectId();
+
+    var currentProj = $scope.AllTheTasksList.filter(function (elem) {
+      return elem.projectId == curProjId;
+    });
+    if (currentProj[0]) {
+      var tasks = currentProj[0].tasks;
+      console.log("current project finaly ", tasks);
+
+      finalTaskListService.formTaskList(tasks);
+      $scope.finalTaskList = finalTaskListService.getFinalTaskList();
+      if (!onSwitch) $scope.$apply();
+      console.log("finalTaskList ", $scope.finalTaskList);
+    } else {
+      var obj = new Object();
+      obj.projectId = curProjId;
+      obj.tasks = [];
+      console.log("new Project with no tasks", obj);
+      $scope.AllTheTasksList.push(obj);
+      finalTaskListService.formTaskList(obj.tasks);
+      $scope.finalTaskList = finalTaskListService.getFinalTaskList();
+      $scope.$apply();
+    }
+  }
+
+  function isEquivalent(a, b) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].tasks.length !== b[i].tasks.length) {
+        return false;
+      }
+      for (var j = 0; j < a[i].tasks.length; j++) {
+        if (a[i].tasks[j].title !== b[i].tasks[j].title) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  $scope.searchTask = function (searchQuery) {
+    $('.match-not-found-screen').addClass('hidden');
+    console.log('search');
+    var list = finalTaskListService.search(searchQuery);
+    if (!isEquivalent(list, $scope.finalTaskList)) {
+      console.log("signal");
+      $scope.finalTaskList = list;
+    }
+
+    if (!$scope.finalTaskList[0] && searchQuery !== "") {
+      $('.match-not-found-screen').removeClass('hidden');
+    }
+  };
+  $scope.clearSerchInputEvent = false;
+  $scope.clearSearchInput = function () {
+    $scope.clearSerchInputEvent = true;
+    this.searchQuery = "";
+    // $("#search-input").focus();
+    console.log("clear active", $scope.active);
+    $('.match-not-found-screen').addClass('hidden');
+  };
+
+  function formListForShow() {
+    console.log("formListForShow");
+    $scope.finalTaskList = finalTaskListService.formTaskList(currentProject);
+  }
+
+  // push task into current project
+  function createTask(task) {
+    $scope.$parent.untoggle();
+    loadingImageService.showTaskLoad();
+    taskService.createTask(authService.getCurrentSession(), projectService.getCurrentProjectId(), task).then(function (result) {
+      $scope.newTask.id = result;
+      $scope.newTask.created_at = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+      finalTaskListService.postCreateAppendTask($scope.newTask);
+      $scope.finalTaskList = finalTaskListService.getFinalTaskList();
+      console.log('final List after create task', $scope.finalTaskList);
+      $rootScope.$broadcast('taskIncrement');
+      for (var i = 0; i < $scope.AllTheTasksList.length; i++) {
+        if ($scope.AllTheTasksList[i].projectId == projectService.getCurrentProjectId()) {
+          var Task = {
+            Task: $scope.newTask
+          };
+          $scope.AllTheTasksList[i].tasks.unshift(Task);
+        }
+      }
+
+      $scope.newTask = {
+        id: "",
+        title: "",
+        description: "",
+        created_at: ""
+      };
+      loadingImageService.hideTaskLoad();
+      $scope.$apply();
+    });
+  }
+
+  $scope.createTask = function (task) {
+    console.log("alt code", task.title);
+    if (task.title !== '' && task.title !== ' ' && task.title !== '\t' && task.title !== '\n' && task.title) {
+      console.log("create task no mater what");
+      createTask(task);
+    } else {
+      $scope.hidden = false;
+      $scope.fadeOut = false;
+    }
+  };
+
+  $scope.openTask = function (title, description) {
+
+    $scope.currentTask = {
+      title: title,
+      description: description
+    };
+
+    $scope.$parent.toggleOpenTask();
+  };
+
+  $scope.completeTask = function (event, taskId) {
+    taskService.completeTask(authService.getCurrentSession(), taskId).then(function (result) {});
+
+    var listLength = $scope.finalTaskList.length;
+    for (var i = 0; i < listLength; i++) {
+      for (var j = 0; j < $scope.finalTaskList[i].tasks.length; j++) {
+        if ($scope.finalTaskList[i].tasks[j].id == taskId) {
+          $scope.finalTaskList[i].tasks.splice(j, 1);
+          if ($scope.finalTaskList[i].tasks.length < 1) {
+            $scope.finalTaskList.splice(i, 1);
+            listLength -= 1;
+            $rootScope.$broadcast('taskDecrement');
+            break;
+          }
+          $rootScope.$broadcast('taskDecrement');
+        }
+      }
+    }
+
+    var AllTheTasksListLength = $scope.AllTheTasksList.length;
+    for (var _i = 0; _i < AllTheTasksListLength; _i++) {
+      for (var _j = 0; _j < $scope.AllTheTasksList[_i].tasks.length; _j++) {
+        if ($scope.AllTheTasksList[_i].tasks[_j].Task.id == taskId) {
+          console.log("AllTheTasksList[i].tasks[j] deleted", $scope.AllTheTasksList[_i].tasks[_j].Task.id);
+          $scope.AllTheTasksList[_i].tasks.splice(_j, 1);
+        }
+      }
+    }
+  };
+});
+'use strict';
+
+var _main = require('./modules/main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Task List
+_main2.default.directive('taskList', function () {
+  return {
+    restrict: 'E',
+    transclude: 'element',
+    templateUrl: './js/modules/TaskList/taskList.html',
+    replace: true,
+
+    controller: function controller($scope) {}
   };
 });
 'use strict';
