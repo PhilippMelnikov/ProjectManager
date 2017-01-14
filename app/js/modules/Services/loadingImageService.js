@@ -17,6 +17,7 @@ app.service('loadingImageService', function() {
 		    }, 100);
 		};
 
+
 		var hideProjectLoad = function () {
 			$('.loading-project').addClass('hidden');
 		};
@@ -36,13 +37,21 @@ app.service('loadingImageService', function() {
 			$('.loading-task').addClass('hidden');
 		};
 
+		var scrollTopOnDeleteProject = function () {
+		    $('.project-list').animate({
+		      scrollTop: 0
+		    }, 100);
+		};
+
 		return {
 			showLoadingScreen: showLoadingScreen,
 			hideLoadingScreen: hideLoadingScreen,
 			showProjectLoad: showProjectLoad,
 			hideProjectLoad: hideProjectLoad,
 			showTaskLoad: showTaskLoad,
-			hideTaskLoad: hideTaskLoad
+			hideTaskLoad: hideTaskLoad,
+			scrollTopOnDeleteProject: scrollTopOnDeleteProject
+
 		}
 	}
 )

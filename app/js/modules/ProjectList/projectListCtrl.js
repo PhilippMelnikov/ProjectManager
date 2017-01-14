@@ -77,10 +77,14 @@ app.controller('ProjectListCtrl', function($scope, $rootScope, $mdDialog, projec
 
    $scope.$on('deleteProject', function (event) {
     $scope.$parent.untoggle();
+    $rootScope.$broadcast('clearTaskList');
+    loadingImageService.showTaskLoad();
+    loadingImageService.scrollTopOnDeleteProject();
     projectService.deleteProject(authService.getCurrentSession())
     .then(function (result) {
       $scope.projects.deleteProject(projectService.getCurrentProjectId());
       $scope.$apply();
+      loadingImageService.hideTaskLoad();
       $scope.setCurrentProject(undefined, $scope.projects.projects[0], false, true);
 
     });

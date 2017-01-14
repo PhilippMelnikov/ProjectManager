@@ -34,6 +34,11 @@ app.controller('TaskListCtrl', function($scope, $rootScope, $mdDialog, projectSe
     setTaskList(false);
   })
 
+  $scope.$on('clearTaskList', function (event) {
+    $scope.finalTaskList = [];
+  })
+
+
   $scope.$on('resetNewTask', function (event) {
     if(!onCreate)
    { 
