@@ -789,6 +789,7 @@ span.l-6 {animation-delay: 0;}
 }
 .fade-out
 {
+	opacity: 0;
 	animation: disappear 0.2s ease-out;
 }
 
@@ -859,7 +860,18 @@ span.l-6 {animation-delay: 0;}
   width: 100%; }
 .red-allert
 {
+	margin-top: 35px;
 	color: rgba(250, 127, 169, 0.9) !important;
+	font-family: "Roboto";
+	font-size: 12px;
+	opacity: 1;
+	// transition: opacity 0.5s ease-in-out;
+	animation: appear 0.2s ease-in-out;
+}
+.red-allert.fade-out
+{
+	animation: disappear 0.2s ease-in-out;
+	opacity: 0;
 }
 @keyframes appear
 {

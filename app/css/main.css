@@ -704,6 +704,7 @@ md-toolbar {
           animation: appear 0.2s ease-out;
 }
 .fade-out {
+  opacity: 0;
   -webkit-animation: disappear 0.2s ease-out;
           animation: disappear 0.2s ease-out;
 }
@@ -773,7 +774,18 @@ md-toolbar {
   width: 100%;
 }
 .red-allert {
+  margin-top: 35px;
   color: rgba(250, 127, 169, 0.9) !important;
+  font-family: "Roboto";
+  font-size: 12px;
+  opacity: 1;
+  -webkit-animation: appear 0.2s ease-in-out;
+          animation: appear 0.2s ease-in-out;
+}
+.red-allert.fade-out {
+  -webkit-animation: disappear 0.2s ease-in-out;
+          animation: disappear 0.2s ease-in-out;
+  opacity: 0;
 }
 @-webkit-keyframes appear {
   0% {
