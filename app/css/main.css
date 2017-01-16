@@ -294,6 +294,9 @@ md-toolbar {
   -webkit-transition: all 0.1s;
   transition: all 0.1s;
 }
+md-select-menu md-content {
+  height: none!important;
+}
 .header {
   position: fixed;
   top: 0;
