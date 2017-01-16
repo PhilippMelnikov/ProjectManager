@@ -11,7 +11,7 @@ import app from './modules/main'
         $scope.active = false;
         var clickPermission = true;
 
-        function activateDisactivateSearchBar() {
+        function activateDisactivateSearchBar(event) {
 
               if (clickPermission)
                 {
@@ -19,7 +19,7 @@ import app from './modules/main'
                     setTimeout(function () {
                       clickPermission = true;
                     },200);
-                    event.preventDefault();
+                    // event.preventDefault();
                     $scope.active = !$scope.active;
 
                   if($scope.active)
@@ -47,8 +47,8 @@ import app from './modules/main'
           
         }
 
-        searchButton.on('click', function () {
-          activateDisactivateSearchBar()
+        searchButton.on('click', function (event) {
+          activateDisactivateSearchBar(event)
         });
 
          searchBar.focusout(function (event) {

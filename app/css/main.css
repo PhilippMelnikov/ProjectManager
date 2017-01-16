@@ -160,13 +160,20 @@ md-card-user-name {
   padding: 10px 0px 10px 16px;
 }
 .project-list .project-list-item p.ng-binding {
-  display: block;
-  -webkit-margin-before: 0em;
-  -webkit-margin-after: 0em;
+  display: inline-block;
   -webkit-margin-start: 0px;
   -webkit-margin-end: 0px;
   padding: 0;
+  margin-bottom: 0;
+  margin-top: 0;
+  line-height: 20px;
   width: 231px;
+}
+.project-list .project-list-item span {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+  vertical-align: text-top;
 }
 .log-out-container {
   background-color: #292c33;
