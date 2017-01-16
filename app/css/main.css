@@ -207,7 +207,7 @@ md-toolbar {
   min-height: 45px;
 }
 .md-select-menu-container {
-  font-weight: 600!important;
+  font-weight: 500!important;
   font-size: 15px!important;
   font-family: 'Roboto' !important;
 }
