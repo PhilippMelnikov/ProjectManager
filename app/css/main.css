@@ -165,9 +165,10 @@ md-card-user-name {
   -webkit-margin-end: 0px;
   padding: 0;
   margin-bottom: 0;
+  margin-right: 6px;
   margin-top: 0;
   line-height: 20px;
-  width: 231px;
+  width: 225px;
 }
 .project-list .project-list-item span {
   display: inline-block;
