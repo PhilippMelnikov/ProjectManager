@@ -296,7 +296,7 @@ md-toolbar {
   transition: all 0.1s;
 }
 md-select-menu md-content {
-  height: none!important;
+  height: auto !important;
 }
 .header {
   position: fixed;
